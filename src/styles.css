@@ -1,1 +1,21 @@
-/* You can add global styles to this file, and also import other style files */
+body {
+    background-color: black !important;
+    color: white !important;
+    overflow: hidden !important;
+}
+
+@font-face {
+    font-family: "FuenteTitulos";
+    src: url("../src/assets/fonts/fuenteTitulos.ttf") format("truetype");
+}  
+
+@font-face {
+    font-family: "FuenteTextos";
+    src: url("../src/assets/fonts/fuenteTextos.ttf") format("truetype");
+}
+
+@font-face {
+    font-family: "Monaco";
+    src: url("../src/assets/fonts/monaco.ttf") format("truetype");
+}
+
