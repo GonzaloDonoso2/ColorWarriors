@@ -1,0 +1,52 @@
+
+#contenedorPanelControl {      
+    background-color: white;
+    border: 4px double gray;
+    border-radius: 4px;   
+    color: white; 
+    height: 200px; 
+    margin-top: 2px;
+    overflow: hidden;
+    position: relative; 
+    width: 528px;
+}
+
+#panelControl {       
+    background-color: #3031B6;   
+    font-family: "Monaco";
+    font-size: 1.5rem;
+    height: 100%;   
+    left: 0px; 
+    position: absolute;
+    table-layout: fixed;
+    top: 0px;
+    width: 100%;
+    z-index: 0;
+}
+
+.botonAccion {
+    border-color: white !important;
+    border-width: 4px;
+    font-family: "FuenteTextos" !important;
+    font-size: 1.2rem !important;
+    width: 10rem;
+}
+
+#botonTerminar {
+    background-color: #9F7B00;    
+    color: white;
+}
+
+#botonTerminar:disabled {
+    background-color: #6C757D;   
+}
+
+#retratoPersonaje {
+    background-color: white;
+    border: 4px double gray;
+    border-radius: 4px;   
+    color: white; 
+    height: 100px; 
+    image-rendering: pixelated;
+    width: 138px;
+}

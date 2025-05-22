@@ -1,0 +1,33 @@
+<div id="contenedorPanelControl">
+    <table id="panelControl">
+        <tbody>
+            <tr>
+                <td>
+                    <img id="retratoPersonaje" src="assets/images/imagenBlanco.png">
+                </td>
+                <td>
+                    <button class="btn btn-danger botonAccion" (click)="botonAtacar()" id="botonAtacar" type="button">Atacar</button>
+                </td>
+                <td>
+                    <button class="btn btn-success botonAccion" id="botonHabilidad" type="button">Habilidad Especial</button>
+                </td>
+            </tr>
+            <tr>
+                <td>
+                    <p id="parrafoNombrePersonaje">Nombre: <label>{{ nombrePersonajeTurno }}</label></p>
+                </td>
+                <td>
+                    <button class="btn btn-primary botonAccion" id="botonDefender" type="button">Defender</button>
+                </td>
+                <td>
+                    <button class="btn btn-warning botonAccion" id="botonTerminar" type="button">Terminar Turno</button>
+                </td>
+            </tr>
+            <tr>
+                <td>
+                    <p id="parrafoSaludPersonaje">Salud: <label>{{ saludPersonajeTurno }}</label>/<label>{{ saludPersonajeTurno }}</label></p>
+                </td>
+            </tr>
+        </tbody>
+    </table>
+</div>

@@ -5,7 +5,6 @@ import Swal from 'sweetalert2';
 @Component({
   selector: 'inicio',
   standalone: true,
-  imports: [],
   templateUrl: './inicio.component.html',
   styleUrl: './inicio.component.css'
 })

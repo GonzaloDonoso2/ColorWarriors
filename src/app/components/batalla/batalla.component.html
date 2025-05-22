@@ -1,0 +1,13 @@
+
+<div id="contenedorPrincipal">
+    <!--<audio  autoplay controls id="reproductorAudio" src="assets/audios/musicaBatalla.wav"></audio>-->
+    <h2>Primera Etapa</h2>
+    <div id="contenedorEscenario">
+        <img id="escenario" src="assets/images/escenario.png">        
+    </div>
+    <panel-control 
+        (atacar)="atacar()" 
+        [identificadorPersonajeTurno]="identificadorPersonajeTurno"
+        [nombrePersonajeTurno]="nombrePersonajeTurno"
+        [saludPersonajeTurno]="saludPersonajeTurno"/>
+</div>

@@ -1,0 +1,28 @@
+#contenedorPrincipal { 
+    display: grid; 
+    justify-content: center;
+    opacity: 0;   
+    text-align: center;
+    transform: translateY(-20px);
+    transition: opacity 0.5s ease, transform 0.5s ease;   
+}
+
+h2 {
+    color: #D5A500;
+    font-family: "FuenteTitulos";
+}
+
+#contenedorEscenario {
+    height: 340px;
+    position: relative;
+    width: 528px;
+    z-index: 0;
+}
+
+#escenario {
+    border-radius: 4px;
+    height: 340px;
+    image-rendering: pixelated;
+    width: 528px;
+    z-index:0;
+}
