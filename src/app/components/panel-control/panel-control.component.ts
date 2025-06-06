@@ -1,7 +1,6 @@
-import { Component, EventEmitter, Input, Output } from '@angular/core';
-import { Personaje } from '../../models/personaje.model';
-import { Aura } from '../../models/aura.model';
-import { Salud } from '../../models/salud.model';
+import { AfterViewInit, Component, EventEmitter, Input, Output } from '@angular/core';
+import { reproducirSonido } from '../../generarNumeroAleatorio.ts/reproducirSonido';
+import { PersonajeService } from '../../services/personaje.service';
 
 @Component({
   selector: 'panel-control',
@@ -9,20 +8,34 @@ import { Salud } from '../../models/salud.model';
   templateUrl: './panel-control.component.html',
   styleUrl: './panel-control.component.css'
 })
-export class PanelControlComponent {
+export class PanelControlComponent  implements AfterViewInit {
 
   @Input() identificadorPersonajeTurno!: number;
   @Input() nombrePersonajeTurno!: string;
   @Input() saludPersonajeTurno!: number;
+  @Input() habilitarPanelControl: boolean = true;
 
   @Output() atacar: EventEmitter<void> = new EventEmitter<void>();
 
+  constructor(
+    private personajeService: PersonajeService
+  ) { }
+
+  ngAfterViewInit(): void {
+
+    this.personajeService.animarImagenRetratoPersonajes(this.nombrePersonajeTurno);
+  }
+
   botonAtacar(): void {
+
+    reproducirSonido('seleccionar');
 
     this.atacar.emit();
   }
 
   deshabilitarBotonesAccion() {
+
+    
     
   }
 }

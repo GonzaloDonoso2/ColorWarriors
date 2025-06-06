@@ -1,6 +1,7 @@
 import { Component, OnInit } from '@angular/core';
 import { Router } from '@angular/router';
 import Swal from 'sweetalert2';
+import { reproducirSonido } from '../../generarNumeroAleatorio.ts/reproducirSonido';
 
 @Component({
   selector: 'inicio',
@@ -89,6 +90,8 @@ export class InicioComponent implements OnInit{
   }
 
   iniciarJuego(): void {
+    
+    reproducirSonido('seleccionar');
 
     const campoNombreJugador: HTMLInputElement = document.getElementById("nombreJugador") as HTMLInputElement;
     const nombreJugador: string = campoNombreJugador.value;

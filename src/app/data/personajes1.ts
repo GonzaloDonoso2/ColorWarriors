@@ -15,8 +15,8 @@ export function obtenerPersonajesPrimeraEtapa(): Personaje[] {
     estado: '',
     equipo: true,
     imagen: 'assets/images/personajes/posturas/inicial/Amarillo1.png',
-    coordenadaX: '232px',
-    coordenadaY: '48px'
+    coordenadaX: 232,
+    coordenadaY: 48
   };
 
   const personaje2: Personaje = {
@@ -30,8 +30,8 @@ export function obtenerPersonajesPrimeraEtapa(): Personaje[] {
     estado: '',
     equipo: true,
     imagen: 'assets/images/personajes/posturas/inicial/Azul1.png',
-    coordenadaX: '168px',
-    coordenadaY: '80px'
+    coordenadaX: 168,
+    coordenadaY: 80
   };
 
   const personaje3: Personaje = {
@@ -45,8 +45,8 @@ export function obtenerPersonajesPrimeraEtapa(): Personaje[] {
     estado: '',
     equipo: true,
     imagen: 'assets/images/personajes/posturas/inicial/Rojo1.png',
-    coordenadaX: '104px',
-    coordenadaY: '112px'
+    coordenadaX: 104,
+    coordenadaY: 112
   };
 
   const personaje4: Personaje = {
@@ -60,8 +60,8 @@ export function obtenerPersonajesPrimeraEtapa(): Personaje[] {
     estado: '',
     equipo: true,
     imagen: 'assets/images/personajes/posturas/inicial/Verde1.png',
-    coordenadaX: '40px',
-    coordenadaY: '144px'
+    coordenadaX: 40,
+    coordenadaY: 144
   };
 
   const personaje5: Personaje = {
@@ -75,8 +75,8 @@ export function obtenerPersonajesPrimeraEtapa(): Personaje[] {
     estado: '',
     equipo: false,
     imagen: 'assets/images/personajes/posturas/inicial/Nigromante1.png',
-    coordenadaX: '424px',
-    coordenadaY: '144px'
+    coordenadaX: 424,
+    coordenadaY: 144
   };
 
   const personaje6: Personaje = {
@@ -90,8 +90,8 @@ export function obtenerPersonajesPrimeraEtapa(): Personaje[] {
     estado: '',
     equipo: false,
     imagen: 'assets/images/personajes/posturas/inicial/Zombi1.png',
-    coordenadaX: '360px',
-    coordenadaY: '176px'
+    coordenadaX: 360,
+    coordenadaY: 176
   };
 
   const personaje7: Personaje = {
@@ -105,8 +105,8 @@ export function obtenerPersonajesPrimeraEtapa(): Personaje[] {
     estado: '',
     equipo: false,
     imagen: 'assets/images/personajes/posturas/inicial/Zombi1.png',
-    coordenadaX: '296px',
-    coordenadaY: '208px'
+    coordenadaX: 296,
+    coordenadaY: 208
   };
 
   const personaje8: Personaje = {
@@ -120,8 +120,8 @@ export function obtenerPersonajesPrimeraEtapa(): Personaje[] {
     estado: '',
     equipo: false,
     imagen: 'assets/images/personajes/posturas/inicial/Zombi1.png',
-    coordenadaX: '232px',
-    coordenadaY: '240px'
+    coordenadaX: 232,
+    coordenadaY: 240
   };
 
   listaPersonajes.push(personaje1);

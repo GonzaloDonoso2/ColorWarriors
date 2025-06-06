@@ -6,50 +6,50 @@ export function obtenerListaSalud(): Salud[] {
 
   const Salud1: Salud = {
     identificador: 1,
-    coordenadaX: '232px',
-    coordenadaY: '28px'
+    coordenadaX: 232,
+    coordenadaY: 28
   };
 
   const Salud2: Salud = {
     identificador: 2,
-    coordenadaX: '168px',
-    coordenadaY: '60px'
+    coordenadaX: 168,
+    coordenadaY: 60
   };
 
   const Salud3: Salud = {
     identificador: 3,
-    coordenadaX: '104px',
-    coordenadaY: '92px'
+    coordenadaX: 104,
+    coordenadaY: 92
   };
 
   const Salud4: Salud = {
     identificador: 4,
-    coordenadaX: '40px',
-    coordenadaY: '124px'
+    coordenadaX: 40,
+    coordenadaY: 124
   };
 
   const Salud5: Salud = {
     identificador: 5,
-    coordenadaX: '424px',
-    coordenadaY: '124px'
+    coordenadaX: 424,
+    coordenadaY: 124
   };
 
   const Salud6: Salud = {
     identificador: 6,
-    coordenadaX: '360px',
-    coordenadaY: '156px'
+    coordenadaX: 360,
+    coordenadaY: 156
   };
 
   const Salud7: Salud = {
     identificador: 7,
-    coordenadaX: '296px',
-    coordenadaY: '188px'
+    coordenadaX: 296,
+    coordenadaY: 188
   };
 
   const Salud8: Salud = {
     identificador: 8,
-    coordenadaX: '232px',
-    coordenadaY: '220px'
+    coordenadaX: 232,
+    coordenadaY: 220
   };
 
   listaSalud.push(Salud1);

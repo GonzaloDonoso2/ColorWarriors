@@ -1,17 +1,26 @@
-export class Ataque {
+import { Accion } from "./accion.model";
 
-    atacante: number;
-    defensor: number;
-    tipo: number;
+export class Ataque extends Accion{
+
+    identificadorAtacante: number;
+    nombreAtacante: string;
+    identificadorDefensor: number;
+    nombreDefensor: string;
+    override tipo: number;
 
     constructor(
-        atacante: number,
-        defensor: number, 
+        identificadorAtacante: number,
+        nombreAtacante: string,
+        identificadorDefensor: number, 
+        nombreDefensor: string,
         tipo: number
     ) {
 
-        this.atacante = atacante;
-        this.defensor = defensor;
+        super(tipo);
+        this.identificadorAtacante = identificadorAtacante;
+        this.nombreAtacante = nombreAtacante;
+        this.identificadorDefensor = identificadorDefensor;
+        this.nombreDefensor = nombreDefensor;
         this.tipo = tipo;
     }
 }

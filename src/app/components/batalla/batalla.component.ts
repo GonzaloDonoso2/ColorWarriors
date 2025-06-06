@@ -1,4 +1,4 @@
-import { Component } from '@angular/core';
+import { AfterViewInit, Component } from '@angular/core';
 import { PanelControlComponent } from '../panel-control/panel-control.component';
 import { PersonajeService } from '../../services/personaje.service';
 import Swal from 'sweetalert2';
@@ -8,6 +8,10 @@ import { Personaje } from '../../models/personaje.model';
 import { obtenerListaAuras } from '../../data/auras';
 import { obtenerListaSalud } from '../../data/salud';
 import { Salud } from '../../models/salud.model';
+import { reproducirSonido } from '../../generarNumeroAleatorio.ts/reproducirSonido';
+import { Accion } from '../../models/accion.model';
+import { Ataque } from '../../models/ataque.model';
+import { tiempoEsperaAnimacion } from '../../generarNumeroAleatorio.ts/tiempoEsperaAnimacion';
 
 @Component({
     selector: 'batalla',
@@ -16,7 +20,7 @@ import { Salud } from '../../models/salud.model';
     templateUrl: './batalla.component.html',
     styleUrl: './batalla.component.css'
 })
-export class BatallaComponent {
+export class BatallaComponent implements AfterViewInit {
 
     contenedorPrincipal!: HTMLDivElement;
     listaPersonajes: Personaje[] = obtenerPersonajesPrimeraEtapa();
@@ -27,7 +31,10 @@ export class BatallaComponent {
     identificadorPersonajeTurno: number = this.listaPersonajesJugadoresOrdenada[0].identificador;
     nombrePersonajeTurno: string = this.listaPersonajesJugadoresOrdenada[0].nombre;
     saludPersonajeTurno: number = this.listaPersonajesJugadoresOrdenada[0].salud;
-
+    numeroAcciones: number = 0;
+    listaAcciones: Accion[] = [];
+    habilitarPanelControl: boolean = true;
+    
     constructor(
         private personajeService: PersonajeService
     ) { }
@@ -91,11 +98,8 @@ export class BatallaComponent {
 
         if (mostrarImagenAura) {
 
-            const audio = new Audio('assets/audios/movimientoCursor.wav');
-            audio.currentTime = 0;
-            audio.volume = 0.1;
-            audio.play();
-
+            reproducirSonido('movimientoCursor');
+            
             imagenAura.style.opacity = "1";
 
         } else {
@@ -113,18 +117,68 @@ export class BatallaComponent {
         }
     }   
     
-    seleccionarObjetivo(): void {
+    seleccionarObjetivo(identificadorPersonaje: number, nombrePersonaje: string): void {
 
-        const audio = new Audio('assets/audios/seleccionar.wav');
-        audio.currentTime = 0;
-        audio.volume = 0.1;
-        audio.play();
+        reproducirSonido('seleccionar');
+
+        const ataque: Ataque = new Ataque(this.identificadorPersonajeTurno, this.nombrePersonajeTurno, identificadorPersonaje, nombrePersonaje, 1);
+
+        this.listaAcciones.push(ataque);        
 
         this.ocultarImagenesAuras();
 
         this.personajeService.borrarPersonajes(this.listaPersonajes);
         this.personajeService.dibujarPersonajes(this.listaPersonajes);
-        this.personajeService.dibujarAuras(this.listaAuras);        
+    }
+
+    ataque(): void {
+
+        
+
+        
+    }
+
+    async ejecutarAcciones(): Promise<void> {
+
+        let numeroPersonajesJugadores: number = 0;
+
+        for (let i = 0; i < this.listaPersonajesJugadoresOrdenada.length; i++) {
+            
+            if (this.listaPersonajesJugadoresOrdenada[i].salud > 0) {
+
+                numeroPersonajesJugadores++
+            }
+        }
+
+        if (numeroPersonajesJugadores === this.numeroAcciones) {
+
+            this.personajeService.borrarAnimacionPersonajes();
+
+            this.personajeService.borrarAnimacionReatroPersonaje();
+            this.habilitarPanelControl = false;
+
+            for (let i = 0; i < this.listaAcciones.length; i++) {
+
+                if (this.listaAcciones[i].tipo === 1) {
+
+                    const ataque: Ataque = this.listaAcciones[i] as Ataque;
+
+
+                    this.personajeService.animarAtaque(this.listaPersonajes, ataque);
+
+                    await tiempoEsperaAnimacion(2000);   
+                    
+                }                
+            }
+
+            this.personajeService.borrarPersonajes(this.listaPersonajes);
+            this.personajeService.dibujarPersonajes(this.listaPersonajes);
+
+        } else {
+
+            this.personajeService.animarImagenRetratoPersonajes(this.nombrePersonajeTurno);
+            this.habilitarPanelControl = true;
+        }
     }
 
     terminarTurno(): void {
@@ -139,14 +193,18 @@ export class BatallaComponent {
             listaPersonajesJugadoresOrdenada[0] = listaPersonajesJugadoresOrdenada[1];
             listaPersonajesJugadoresOrdenada.splice(1, 1);
             listaPersonajesJugadoresOrdenada.push(primeroPersonaje);
-        }
-        
-        this.listaPersonajesJugadoresOrdenada = listaPersonajesJugadoresOrdenada;
-        this.identificadorPersonajeTurno = listaPersonajesJugadoresOrdenada[0].identificador;
-        this.nombrePersonajeTurno = listaPersonajesJugadoresOrdenada[0].nombre;
-        this.saludPersonajeTurno = listaPersonajesJugadoresOrdenada[0].salud;
-    }
 
+            this.listaPersonajesJugadoresOrdenada = listaPersonajesJugadoresOrdenada;
+            this.identificadorPersonajeTurno = listaPersonajesJugadoresOrdenada[0].identificador;
+            this.nombrePersonajeTurno = listaPersonajesJugadoresOrdenada[0].nombre;
+            this.saludPersonajeTurno = listaPersonajesJugadoresOrdenada[0].salud;            
+        }
+
+        this.numeroAcciones++
+
+        this.ejecutarAcciones();
+    }
+    
     atacar(): void {
 
         for (let i = 0; i < this.listaPersonajes.length; i++) {
@@ -158,7 +216,7 @@ export class BatallaComponent {
                 imagenPersonaje.style.cursor = 'pointer';
                 imagenPersonaje.addEventListener("mouseenter", () => this.mostrarOcultarImagenAura(this.listaPersonajes[i].identificador, true));
                 imagenPersonaje.addEventListener("mouseleave", () => this.mostrarOcultarImagenAura(this.listaPersonajes[i].identificador, false));
-                imagenPersonaje.addEventListener("click", () => { this.seleccionarObjetivo(), this.terminarTurno() });
+                imagenPersonaje.addEventListener("click", () => { this.seleccionarObjetivo(this.listaPersonajes[i].identificador, this.listaPersonajes[i].nombre), this.terminarTurno() });
 
             } else {
 

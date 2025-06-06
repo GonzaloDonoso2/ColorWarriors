@@ -1,13 +1,13 @@
 export class Salud {
 
     identificador: number;
-    coordenadaX: string;
-    coordenadaY: string;
+    coordenadaX: number;
+    coordenadaY: number;
 
     constructor(
         identificador: number,
-        coordenadaX: string,
-        coordenadaY: string,
+        coordenadaX: number,
+        coordenadaY: number,
     ) {
         this.identificador = identificador;
         this.coordenadaX = coordenadaX;

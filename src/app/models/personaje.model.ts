@@ -10,8 +10,8 @@ export class Personaje {
     estado: string;
     equipo: boolean;
     imagen: string;
-    coordenadaX: string;
-    coordenadaY: string;
+    coordenadaX: number;
+    coordenadaY: number;
 
     constructor(
         identificador: number,
@@ -24,8 +24,8 @@ export class Personaje {
         estado: string,
         equipo: boolean,
         imagen: string,
-        coordenadaX: string,
-        coordenadaY: string,
+        coordenadaX: number,
+        coordenadaY: number,
     ) {
         this.identificador = identificador;
         this.nombre = nombre;

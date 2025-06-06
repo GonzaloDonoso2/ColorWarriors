@@ -2,14 +2,14 @@ export class Aura {
 
     identificador: number;
     imagen: string;
-    coordenadaX: string;
-    coordenadaY: string;
+    coordenadaX: number;
+    coordenadaY: number;
 
     constructor(
         identificador: number,
         imagen: string,
-        coordenadaX: string,
-        coordenadaY: string,
+        coordenadaX: number,
+        coordenadaY: number,
     ) {
         this.identificador = identificador;
         this.imagen = imagen;

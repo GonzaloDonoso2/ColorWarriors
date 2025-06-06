@@ -4,11 +4,14 @@
     border: 4px double gray;
     border-radius: 4px;   
     color: white; 
-    height: 200px; 
+    /*height: 220px;*/
+    height: 50%;
+    margin: 0 auto; 
     margin-top: 2px;
     overflow: hidden;
     position: relative; 
-    width: 528px;
+    /*width: 528px;*/
+    width: 100%;
 }
 
 #panelControl {       
@@ -41,12 +44,14 @@
     background-color: #6C757D;   
 }
 
-#retratoPersonaje {
+#imagenRetratoPersonaje {
     background-color: white;
     border: 4px double gray;
     border-radius: 4px;   
     color: white; 
-    height: 100px; 
+    /*height: 120px;*/ 
+    height: 6rem;
     image-rendering: pixelated;
-    width: 138px;
+    /*width: 108px;*/
+    width: 6rem;
 }

@@ -1,7 +1,9 @@
 body {
-    background-color: black !important;
-    color: white !important;
-    overflow: hidden !important;
+    background-color: black;
+    color: white;
+    height: 100vh;
+    overflow: hidden;
+    width: 100vw;
 }
 
 @font-face {
