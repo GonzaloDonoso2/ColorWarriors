@@ -220,15 +220,9 @@ export class BatallaComponent implements AfterViewInit {
                     const ataque: Ataque = this.listaAcciones[i] as Ataque;
 
                     this.personajeService.animarAtaque(this.listaPersonajes, ataque);
+                    this.personajeService.animarDefensaHerido(ataque);
 
-                    if (ataque.danio > 0) {
-
-                        await this.personajeService.animarDanio(ataque);
-
-                    } else {
-
-                        await this.personajeService.animarDefensa(ataque);
-                    }
+                    await this.personajeService.animarDefensaSalud(ataque);
 
                     await tiempoEsperaAnimacion(2000);                       
                 }                

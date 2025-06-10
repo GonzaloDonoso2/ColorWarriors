@@ -283,8 +283,6 @@ export class PersonajeService {
 
       imagenPersonaje.src = rutaImagen + ataque.nombreAtacante + numeroImagen + extencionImagen;
 
-      console.log(rutaImagen + ataque.nombreAtacante + numeroImagen + extencionImagen);
-
       if (numeroImagen === 3) { reproducirSonido('golpe'); }
 
       if (numeroImagen === 4) { 
@@ -301,41 +299,71 @@ export class PersonajeService {
     return;
   }
 
-  async animarDefensa(ataque: Ataque) {
+  async animarDefensaHerido(ataque: Ataque): Promise<void> {
 
-    const contenedorSalud: HTMLParagraphElement = document.getElementById(`contenedorSalud${ ataque.identificadorDefensor }`) as HTMLParagraphElement;
+    let postura: string;
 
-    contenedorSalud.style.color = 'blue';
-    contenedorSalud.textContent = '-1 ';
+    if (ataque.danio > 0) { 
 
-    const imagen: HTMLImageElement = document.createElement('img');
+      postura = 'herido';
 
-    imagen.style.height = '80%';
-    imagen.style.width = '25%';
-    imagen.src = `assets/images/icons/shield-reflect_38114.ico`;
-    imagen.style.filter = 'brightness(0) saturate(100%) invert(11%) sepia(100%) saturate(7459%) hue-rotate(234deg)';
+    } else {
 
-    contenedorSalud.appendChild(imagen);
-    contenedorSalud.style.opacity = '1';
+      postura = 'defensa';
+    }
 
-    await tiempoEsperaAnimacion(1000);
+    const rutaImagen: string = `assets/images/personajes/posturas/${ postura }/`;
+    const extencionImagen: string = '.png';
+    const imagenPersonaje: HTMLImageElement = document.getElementById(`imagenPersonaje${ ataque.identificadorDefensor }`) as HTMLImageElement;
 
-    contenedorSalud.style.opacity = '0';    
+    let numeroImagen: number = 1;
+
+    while (numeroImagen < 5) {      
+
+      imagenPersonaje.src = rutaImagen + ataque.nombreDefensor + numeroImagen + extencionImagen;
+
+      numeroImagen++
+
+      await tiempoEsperaAnimacion(250);
+    }
+
+    return;
   }
 
-  async animarDanio(ataque: Ataque) {
+  async animarDefensaSalud(ataque: Ataque) {
 
     const contenedorSalud: HTMLParagraphElement = document.getElementById(`contenedorSalud${ ataque.identificadorDefensor }`) as HTMLParagraphElement;
-   
-    contenedorSalud.style.color = 'red';
-    contenedorSalud.textContent = '-' + ataque.danio.toString();
 
+    let texto: string;
+    let color: string;
+    let icono: string;
+    let filtro: string;
+
+    if (ataque.danio > 0) {
+
+      texto = `-${ ataque.danio } `;
+      color = 'red'; 
+      icono = 'Corazon';      
+      filtro = 'brightness(0) saturate(100%) invert(16%) sepia(100%) saturate(7490%) hue-rotate(0deg)';      
+
+    } else {
+
+      texto = '-1 ';
+      color = 'blue';
+      icono = 'Escudo';  
+      filtro = 'brightness(0) saturate(100%) invert(11%) sepia(100%) saturate(7459%) hue-rotate(234deg)';
+    } 
+
+    contenedorSalud.style.color = color;
+    contenedorSalud.textContent = texto;
+
+    const rutaIcono: string = `assets/images/icons/${ icono }.ico`;  
     const imagen: HTMLImageElement = document.createElement('img');
 
-    imagen.style.height = '80%';
+    imagen.style.height = '80%';    
+    imagen.style.filter = filtro;
     imagen.style.width = '25%';
-    imagen.src = `assets/images/icons/Dur.ico`;
-    imagen.style.filter = 'brightness(0) saturate(100%) invert(16%) sepia(100%) saturate(7490%) hue-rotate(0deg)';
+    imagen.src = rutaIcono;
 
     contenedorSalud.appendChild(imagen);
     contenedorSalud.style.opacity = '1';
