@@ -8,10 +8,10 @@ import { Personaje } from '../../models/personaje.model';
 import { obtenerListaAuras } from '../../data/auras';
 import { obtenerListaSalud } from '../../data/salud';
 import { Salud } from '../../models/salud.model';
-import { reproducirSonido } from '../../generarNumeroAleatorio.ts/reproducirSonido';
+import { generarNumeroAleatorio, reproducirSonido } from '../../utils/utilidades';
 import { Accion } from '../../models/accion.model';
 import { Ataque } from '../../models/ataque.model';
-import { tiempoEsperaAnimacion } from '../../generarNumeroAleatorio.ts/tiempoEsperaAnimacion';
+import { tiempoEsperaAnimacion } from '../../utils/utilidades';
 
 @Component({
     selector: 'batalla',
@@ -108,11 +108,52 @@ export class BatallaComponent implements AfterViewInit {
         }
     }
 
+    calcularResultadoAtaque(identificadorAtacante: number, identificadorDefensor: number): number {
+
+        const indicePersonajeAtacante: number = this.listaPersonajes.findIndex(personaje => personaje.identificador === identificadorAtacante);
+        const indicePersonajeDefensor: number = this.listaPersonajes.findIndex(personaje => personaje.identificador === identificadorDefensor);
+
+        if (this.listaPersonajes[indicePersonajeDefensor].salud > 0) {
+
+            const puntuacionAtaque: number = this.listaPersonajes[indicePersonajeAtacante].ataque;
+            const puntuacionDefensa: number = this.listaPersonajes[indicePersonajeDefensor].defensa;
+            const numeroAleatorio: number = generarNumeroAleatorio(1, 100);
+            const puntuacionTotal: number = (puntuacionAtaque + puntuacionDefensa);
+            const probabilidadDefensa: number = Math.round((puntuacionDefensa * 100) / puntuacionTotal);        
+
+            if (numeroAleatorio > probabilidadDefensa) {
+
+                const puntuacionDanio: number = generarNumeroAleatorio(1, this.listaPersonajes[indicePersonajeAtacante].danio);
+                const nuevaPuntuacionDefensa: number = (this.listaPersonajes[indicePersonajeDefensor].defensa--);
+
+                if (nuevaPuntuacionDefensa > 0) {
+
+                    this.listaPersonajes[indicePersonajeDefensor].defensa = nuevaPuntuacionDefensa;
+
+                } else {
+
+                    this.listaPersonajes[indicePersonajeDefensor].defensa = 0;
+                }
+
+                return puntuacionDanio;
+
+            } else {
+
+                return 0;
+            }
+
+        } else {
+
+            return 0;
+        }
+    }
+
     ocultarImagenesAuras(): void {
 
         for (let i = 0; i < this.listaAuras.length; i++) {
 
             const imagenAura: HTMLImageElement = document.getElementById(`imagenAura${ this.listaAuras[i].identificador }`) as HTMLImageElement;
+
             imagenAura.style.opacity = '0';
         }
     }   
@@ -121,7 +162,8 @@ export class BatallaComponent implements AfterViewInit {
 
         reproducirSonido('seleccionar');
 
-        const ataque: Ataque = new Ataque(this.identificadorPersonajeTurno, this.nombrePersonajeTurno, identificadorPersonaje, nombrePersonaje, 1);
+        const puntuacionDanio: number = this.calcularResultadoAtaque(this.identificadorPersonajeTurno, identificadorPersonaje);
+        const ataque: Ataque = new Ataque(this.identificadorPersonajeTurno, this.nombrePersonajeTurno, identificadorPersonaje, nombrePersonaje, puntuacionDanio, 1);
 
         this.listaAcciones.push(ataque);        
 
@@ -131,13 +173,26 @@ export class BatallaComponent implements AfterViewInit {
         this.personajeService.dibujarPersonajes(this.listaPersonajes);
     }
 
-    ataque(): void {
+    seleccionarObjetivos(): void {
 
-        
+        for (let i = 0; i < this.listaPersonajes.length; i++) {
 
-        
+            const imagenPersonaje: HTMLImageElement = document.getElementById(`imagenPersonaje${ this.listaPersonajes[i].identificador }`) as HTMLImageElement;
+
+            if (!this.listaPersonajes[i].equipo && this.listaPersonajes[i].salud > 0) {
+
+                imagenPersonaje.style.cursor = 'pointer';
+                imagenPersonaje.addEventListener("mouseenter", () => this.mostrarOcultarImagenAura(this.listaPersonajes[i].identificador, true));
+                imagenPersonaje.addEventListener("mouseleave", () => this.mostrarOcultarImagenAura(this.listaPersonajes[i].identificador, false));
+                imagenPersonaje.addEventListener("click", () => { this.seleccionarObjetivo(this.listaPersonajes[i].identificador, this.listaPersonajes[i].nombre), this.terminarTurno() });
+
+            } else {
+
+                imagenPersonaje.style.opacity = '0.5';
+            }
+        }
     }
-
+    
     async ejecutarAcciones(): Promise<void> {
 
         let numeroPersonajesJugadores: number = 0;
@@ -155,6 +210,7 @@ export class BatallaComponent implements AfterViewInit {
             this.personajeService.borrarAnimacionPersonajes();
 
             this.personajeService.borrarAnimacionReatroPersonaje();
+
             this.habilitarPanelControl = false;
 
             for (let i = 0; i < this.listaAcciones.length; i++) {
@@ -163,11 +219,18 @@ export class BatallaComponent implements AfterViewInit {
 
                     const ataque: Ataque = this.listaAcciones[i] as Ataque;
 
-
                     this.personajeService.animarAtaque(this.listaPersonajes, ataque);
 
-                    await tiempoEsperaAnimacion(2000);   
-                    
+                    if (ataque.danio > 0) {
+
+                        await this.personajeService.animarDanio(ataque);
+
+                    } else {
+
+                        await this.personajeService.animarDefensa(ataque);
+                    }
+
+                    await tiempoEsperaAnimacion(2000);                       
                 }                
             }
 
@@ -203,25 +266,5 @@ export class BatallaComponent implements AfterViewInit {
         this.numeroAcciones++
 
         this.ejecutarAcciones();
-    }
-    
-    atacar(): void {
-
-        for (let i = 0; i < this.listaPersonajes.length; i++) {
-
-            const imagenPersonaje: HTMLImageElement = document.getElementById(`imagenPersonaje${ this.listaPersonajes[i].identificador }`) as HTMLImageElement;
-
-            if (!this.listaPersonajes[i].equipo && this.listaPersonajes[i].salud > 0) {
-
-                imagenPersonaje.style.cursor = 'pointer';
-                imagenPersonaje.addEventListener("mouseenter", () => this.mostrarOcultarImagenAura(this.listaPersonajes[i].identificador, true));
-                imagenPersonaje.addEventListener("mouseleave", () => this.mostrarOcultarImagenAura(this.listaPersonajes[i].identificador, false));
-                imagenPersonaje.addEventListener("click", () => { this.seleccionarObjetivo(this.listaPersonajes[i].identificador, this.listaPersonajes[i].nombre), this.terminarTurno() });
-
-            } else {
-
-                imagenPersonaje.style.opacity = '0.5';
-            }
-        }
     }
 }

@@ -3,8 +3,8 @@ import { Personaje } from '../models/personaje.model';
 import { Aura } from '../models/aura.model';
 import { Salud } from '../models/salud.model';
 import { Ataque } from '../models/ataque.model';
-import { reproducirSonido } from '../generarNumeroAleatorio.ts/reproducirSonido';
-import { tiempoEsperaAnimacion } from '../generarNumeroAleatorio.ts/tiempoEsperaAnimacion';
+import { reproducirSonido } from '../utils/utilidades';
+import { tiempoEsperaAnimacion } from '../utils/utilidades';
 
 @Injectable({
   providedIn: 'root'
@@ -100,8 +100,9 @@ export class PersonajeService {
         //imagenPersonaje.style.top = listaPersonajes[i].coordenadaY;
         imagenPersonaje.style.top = coordenadaY + 'px';
         //imagenPersonaje.style.width = '64px';
+        imagenPersonaje.style.transition = 'opacity 0.5s ease';
         imagenPersonaje.style.width = anchoPersonaje + 'px';
-        imagenPersonaje.style.zIndex = '1';
+        imagenPersonaje.style.zIndex = '1';      
 
         if (!listaPersonajes[i].equipo) {
 
@@ -141,6 +142,7 @@ export class PersonajeService {
       //imagenAura.style.top = listaAuras[i].coordenadaY
       imagenAura.style.top = coordenadaY + 'px';
       //imagenAura.style.width = '64px';
+      imagenAura.style.transition = 'opacity 0.5s ease';
       imagenAura.style.width = anchoAura + 'px';
       imagenAura.style.zIndex = '0';
 
@@ -156,7 +158,7 @@ export class PersonajeService {
     const altoContenedor: number = contenedorEscenario.clientHeight;
     const anchoContenedor: number = contenedorEscenario.clientWidth;
     const altoSalud: number = Math.round((30 / 340) * altoContenedor);
-    const anchoSalud: number = Math.round((64 / 528) * anchoContenedor);
+    const anchoSalud: number = Math.round((100 / 528) * anchoContenedor);
 
     for (let i = 0; i < listaSalud.length; i++) {
 
@@ -184,6 +186,7 @@ export class PersonajeService {
       //contenedorSalud.style.top = listaSalud[i].coordenadaY;
       contenedorSalud.style.top = coordenadaY + 'px';
       //contenedorSalud.style.width = '64px';
+      contenedorSalud.style.transition = 'opacity 0.5s ease';
       contenedorSalud.style.width = anchoSalud + 'px';
       contenedorSalud.style.zIndex = '1';
 
@@ -296,5 +299,62 @@ export class PersonajeService {
     }
 
     return;
+  }
+
+  async animarDefensa(ataque: Ataque) {
+
+    const contenedorSalud: HTMLParagraphElement = document.getElementById(`contenedorSalud${ ataque.identificadorDefensor }`) as HTMLParagraphElement;
+
+    contenedorSalud.style.color = 'blue';
+    contenedorSalud.textContent = '-1 ';
+
+    const imagen: HTMLImageElement = document.createElement('img');
+
+    imagen.style.height = '80%';
+    imagen.style.width = '25%';
+    imagen.src = `assets/images/icons/shield-reflect_38114.ico`;
+    imagen.style.filter = 'brightness(0) saturate(100%) invert(11%) sepia(100%) saturate(7459%) hue-rotate(234deg)';
+
+    contenedorSalud.appendChild(imagen);
+    contenedorSalud.style.opacity = '1';
+
+    await tiempoEsperaAnimacion(1000);
+
+    contenedorSalud.style.opacity = '0';    
+  }
+
+  async animarDanio(ataque: Ataque) {
+
+    const contenedorSalud: HTMLParagraphElement = document.getElementById(`contenedorSalud${ ataque.identificadorDefensor }`) as HTMLParagraphElement;
+   
+    contenedorSalud.style.color = 'red';
+    contenedorSalud.textContent = '-' + ataque.danio.toString();
+
+    const imagen: HTMLImageElement = document.createElement('img');
+
+    imagen.style.height = '80%';
+    imagen.style.width = '25%';
+    imagen.src = `assets/images/icons/Dur.ico`;
+    imagen.style.filter = 'brightness(0) saturate(100%) invert(16%) sepia(100%) saturate(7490%) hue-rotate(0deg)';
+
+    contenedorSalud.appendChild(imagen);
+    contenedorSalud.style.opacity = '1';
+
+    await tiempoEsperaAnimacion(1000);
+
+    contenedorSalud.style.opacity = '0';    
+  }
+
+  async animarMuertePersonaje(identificadorPersonaje: number): Promise<void> {
+
+    const imagenPersonaje: HTMLImageElement = document.getElementById(`imagenPersonaje${ identificadorPersonaje }`) as HTMLImageElement;
+    const imagenAura: HTMLImageElement = document.getElementById(`imagenAura${ identificadorPersonaje }`) as HTMLImageElement;
+    const contenedorSalud: HTMLParagraphElement = document.getElementById(`contenedorSalud${ identificadorPersonaje }`) as HTMLParagraphElement;
+
+    await tiempoEsperaAnimacion(1000);
+
+    imagenPersonaje.style.opacity = '0';
+    imagenAura.style.opacity = '0';
+    contenedorSalud.style.opacity = '0';
   }
 }

@@ -6,6 +6,7 @@ export class Ataque extends Accion{
     nombreAtacante: string;
     identificadorDefensor: number;
     nombreDefensor: string;
+    danio: number;
     override tipo: number;
 
     constructor(
@@ -13,14 +14,15 @@ export class Ataque extends Accion{
         nombreAtacante: string,
         identificadorDefensor: number, 
         nombreDefensor: string,
+        danio: number,
         tipo: number
     ) {
-
         super(tipo);
         this.identificadorAtacante = identificadorAtacante;
         this.nombreAtacante = nombreAtacante;
         this.identificadorDefensor = identificadorDefensor;
         this.nombreDefensor = nombreDefensor;
+        this.danio = danio;
         this.tipo = tipo;
     }
 }

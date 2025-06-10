@@ -1,5 +1,5 @@
 import { AfterViewInit, Component, EventEmitter, Input, Output } from '@angular/core';
-import { reproducirSonido } from '../../generarNumeroAleatorio.ts/reproducirSonido';
+import { reproducirSonido } from '../../utils/utilidades';
 import { PersonajeService } from '../../services/personaje.service';
 
 @Component({
