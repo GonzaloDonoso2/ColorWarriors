@@ -1,35 +1,37 @@
 #contenedorPrincipal { 
-    /*display: grid;*/ 
-    height: 60%;
-    /*justify-content: center;*/
-    opacity: 0;   
-    margin: 0 auto; 
+    height: 90%;
+    opacity: 0;
+    margin: 10px auto; 
     text-align: center;
     transform: translateY(-20px);
     transition: opacity 0.5s ease, transform 0.5s ease;  
-    width: 60%; 
-}
-
-h2 {
-    color: #D5A500;
-    font-family: "FuenteTitulos";
+    width: 90%; 
 }
 
 #contenedorEscenario {
-    /*height: 340px;*/
-    height: 100%;
+    height: 60%;
     position: relative;
-    /*width: 528px;*/
     width: 100%;
     z-index: 0;
 }
 
+#contenedorPanelControl {      
+    background-color: white;
+    border: 4px double gray;
+    border-radius: 4px;   
+    color: white; 
+    height: 40%;
+    margin: 0 auto; 
+    margin-top: 2px;
+    overflow: hidden;
+    position: relative; 
+    width: 100%;
+}
+
 #escenario {
     border-radius: 4px;
-    /*height: 340px;*/
     height: 100%;
     image-rendering: pixelated;
-    /*width: 528px;*/
     width: 100%;
     z-index:0;
 }

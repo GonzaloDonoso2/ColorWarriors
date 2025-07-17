@@ -1,14 +1,16 @@
 
-<div class="col-12" id="contenedorPrincipal">
-    <!--<audio autoplay controls id="reproductorAudio" src="assets/audios/musicaBatalla.wav"></audio>-->
-    <h2>Primera Etapa</h2>
-    <div id="contenedorEscenario">
+<div class="col-12" id="contenedorPrincipal" #contenedorPrincipal>
+    <!--<audio autoplay id="reproductorAudio" src="assets/audios/musicaBatalla.wav" #reproductorAudio></audio>-->
+    <!--<h2>Primera Etapa</h2>-->
+    <div #contenedorEscenario id="contenedorEscenario">
         <img id="escenario" src="assets/images/escenario.png">        
     </div>
-    <panel-control 
-        (atacar)="seleccionarObjetivos()" 
+    <div id="contenedorPanelControl">
+        <panel-control 
+        (seleccionarObjetivos)="seleccionarObjetivos()" 
         [identificadorPersonajeTurno]="identificadorPersonajeTurno"
         [nombrePersonajeTurno]="nombrePersonajeTurno"
         [saludPersonajeTurno]="saludPersonajeTurno"
         [habilitarPanelControl]="habilitarPanelControl"/>
+    </div>
 </div>

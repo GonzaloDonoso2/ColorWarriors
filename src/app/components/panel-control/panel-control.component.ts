@@ -1,6 +1,6 @@
 import { AfterViewInit, Component, EventEmitter, Input, Output } from '@angular/core';
 import { reproducirSonido } from '../../utils/utilidades';
-import { PersonajeService } from '../../services/personaje.service';
+import { AnimacionesService } from '../../services/animaciones.service';
 
 @Component({
   selector: 'panel-control',
@@ -13,29 +13,22 @@ export class PanelControlComponent  implements AfterViewInit {
   @Input() identificadorPersonajeTurno!: number;
   @Input() nombrePersonajeTurno!: string;
   @Input() saludPersonajeTurno!: number;
+  @Input() defensaPersonajeTurno!: number;
   @Input() habilitarPanelControl: boolean = true;
 
-  @Output() atacar: EventEmitter<void> = new EventEmitter<void>();
+  @Output() seleccionarObjetivos: EventEmitter<void> = new EventEmitter<void>();
 
-  constructor(
-    private personajeService: PersonajeService
-  ) { }
+  constructor(private animacionesService: AnimacionesService) { }
 
   ngAfterViewInit(): void {
 
-    this.personajeService.animarImagenRetratoPersonajes(this.nombrePersonajeTurno);
+    this.animacionesService.animarRetratoPersonaje(this.nombrePersonajeTurno);
   }
 
   botonAtacar(): void {
 
     reproducirSonido('seleccionar');
 
-    this.atacar.emit();
-  }
-
-  deshabilitarBotonesAccion() {
-
-    
-    
+    this.seleccionarObjetivos.emit();
   }
 }

@@ -7,7 +7,7 @@ export function reproducirSonido(nombreSonido: string) {
     sonido.play();
 };
 
-export function tiempoEsperaAnimacion(miliSegundos: number): Promise<void> {
+export function tiempoEspera(miliSegundos: number): Promise<void> {
 
   return new Promise(resolve => setTimeout(resolve, miliSegundos));
 }

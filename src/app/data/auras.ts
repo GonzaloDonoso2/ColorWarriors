@@ -7,6 +7,8 @@ export function obtenerListaAuras(): Aura[] {
   const aura1: Aura = {
     identificador: 1,
     imagen: 'assets/images/auras/1.png',
+    alto: 48,
+    ancho: 64,
     coordenadaX: 234,
     coordenadaY: 88
   };
@@ -14,6 +16,8 @@ export function obtenerListaAuras(): Aura[] {
   const aura2: Aura = {
     identificador: 2,
     imagen: 'assets/images/auras/1.png',
+    alto: 48,
+    ancho: 64,
     coordenadaX: 170,
     coordenadaY: 120
   };
@@ -21,6 +25,8 @@ export function obtenerListaAuras(): Aura[] {
   const aura3: Aura = {
     identificador: 3,
     imagen: 'assets/images/auras/1.png',
+    alto: 48,
+    ancho: 64,
     coordenadaX: 106,
     coordenadaY: 152
   };
@@ -28,6 +34,8 @@ export function obtenerListaAuras(): Aura[] {
   const aura4: Aura = {
     identificador: 4,
     imagen: 'assets/images/auras/1.png',
+    alto: 48,
+    ancho: 64,
     coordenadaX: 42,
     coordenadaY: 184
   };
@@ -35,6 +43,8 @@ export function obtenerListaAuras(): Aura[] {
   const aura5: Aura = {
     identificador: 5,
     imagen: 'assets/images/auras/1.png',
+    alto: 48,
+    ancho: 64,
     coordenadaX: 422,
     coordenadaY: 184
   };
@@ -42,6 +52,8 @@ export function obtenerListaAuras(): Aura[] {
   const aura6: Aura = {
     identificador: 6,
     imagen: 'assets/images/auras/1.png',
+    alto: 48,
+    ancho: 64,
     coordenadaX: 358,
     coordenadaY: 216
   };
@@ -49,6 +61,8 @@ export function obtenerListaAuras(): Aura[] {
   const aura7: Aura = {
     identificador: 7,
     imagen: 'assets/images/auras/1.png',
+    alto: 48,
+    ancho: 64,
     coordenadaX: 294,
     coordenadaY: 248
   };
@@ -56,6 +70,8 @@ export function obtenerListaAuras(): Aura[] {
   const aura8: Aura = {
     identificador: 8,
     imagen: 'assets/images/auras/1.png',
+    alto: 48,
+    ancho: 64,
     coordenadaX: 230,
     coordenadaY: 280
   };

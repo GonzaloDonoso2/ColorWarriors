@@ -1,19 +1,4 @@
 
-#contenedorPanelControl {      
-    background-color: white;
-    border: 4px double gray;
-    border-radius: 4px;   
-    color: white; 
-    /*height: 220px;*/
-    height: 50%;
-    margin: 0 auto; 
-    margin-top: 2px;
-    overflow: hidden;
-    position: relative; 
-    /*width: 528px;*/
-    width: 100%;
-}
-
 #panelControl {       
     background-color: #3031B6;   
     font-family: "Monaco";

@@ -1,17 +1,16 @@
-import { AfterViewInit, Component } from '@angular/core';
+import { AfterViewInit, Component, ElementRef, ViewChild } from '@angular/core';
 import { PanelControlComponent } from '../panel-control/panel-control.component';
-import { PersonajeService } from '../../services/personaje.service';
 import Swal from 'sweetalert2';
 import { Aura } from '../../models/aura.model';
 import { obtenerPersonajesPrimeraEtapa } from '../../data/personajes1';
 import { Personaje } from '../../models/personaje.model';
 import { obtenerListaAuras } from '../../data/auras';
-import { obtenerListaSalud } from '../../data/salud';
-import { Salud } from '../../models/salud.model';
-import { generarNumeroAleatorio, reproducirSonido } from '../../utils/utilidades';
+import { reproducirSonido } from '../../utils/utilidades';
 import { Accion } from '../../models/accion.model';
 import { Ataque } from '../../models/ataque.model';
-import { tiempoEsperaAnimacion } from '../../utils/utilidades';
+import { tiempoEspera } from '../../utils/utilidades';
+import { AnimacionesService } from '../../services/animaciones.service';
+import { MecanicasService } from '../../services/mecanicas.service';
 
 @Component({
     selector: 'batalla',
@@ -22,243 +21,422 @@ import { tiempoEsperaAnimacion } from '../../utils/utilidades';
 })
 export class BatallaComponent implements AfterViewInit {
 
-    contenedorPrincipal!: HTMLDivElement;
-    listaPersonajes: Personaje[] = obtenerPersonajesPrimeraEtapa();
-    listaPersonajesOrdenada: Personaje[] = this.obtenerListaPersonajesOrdenada();
-    listaPersonajesJugadoresOrdenada: Personaje[] = this.obtenerListaPersonajesJugadoresOrdenada();
-    listaAuras: Aura[] = obtenerListaAuras();
-    listaSalud: Salud[] = obtenerListaSalud();    
-    identificadorPersonajeTurno: number = this.listaPersonajesJugadoresOrdenada[0].identificador;
-    nombrePersonajeTurno: string = this.listaPersonajesJugadoresOrdenada[0].nombre;
-    saludPersonajeTurno: number = this.listaPersonajesJugadoresOrdenada[0].salud;
+    //@ViewChild('reproductorAudio') reproductorAudio!: ElementRef<HTMLAudioElement>;
+    @ViewChild('contenedorPrincipal') contenedorPrincipal!: ElementRef<HTMLDivElement>;
+    @ViewChild('contenedorEscenario') contenedorEscenario!: ElementRef<HTMLDivElement>;
+
+    personajes: Personaje[] = obtenerPersonajesPrimeraEtapa();
+    personajesOrdenados: Personaje[] = this.mecanicasService.obtenerPersonajesJugadoresOrdenados(this.personajes);
+    personajesJugadoresOrdenados: Personaje[] = this.mecanicasService.obtenerPersonajesJugadoresOrdenados(this.personajes);
+    auras: Aura[] = obtenerListaAuras();
+    identificadorPersonajeTurno: number = this.personajesJugadoresOrdenados[0].identificador;
+    nombrePersonajeTurno: string = this.personajesJugadoresOrdenados[0].nombre;
+    saludPersonajeTurno: number = this.personajesJugadoresOrdenados[0].salud;
+    defensaPersonajeTurno: number = this.personajesJugadoresOrdenados[0].defensa;
     numeroAcciones: number = 0;
-    listaAcciones: Accion[] = [];
+    acciones: Accion[] = [];
     habilitarPanelControl: boolean = true;
     
-    constructor(
-        private personajeService: PersonajeService
+    constructor(        
+        private mecanicasService: MecanicasService,
+        private animacionesService: AnimacionesService
     ) { }
 
-    async ngAfterViewInit(): Promise<void> {
-
-        this.contenedorPrincipal = document.getElementById("contenedorPrincipal") as HTMLDivElement;
-        this.contenedorPrincipal.style.opacity = "1";
-        this.contenedorPrincipal.style.transform = "translateY(0)";
-
-        /*const reproductorAudio: HTMLAudioElement = document.getElementById("reproductorAudio") as HTMLAudioElement;
-        reproductorAudio.volume = 0.1;*/
+    ngAfterViewInit(): void {
 
         setTimeout(() => {
 
-            //this.reproducirMusica(); 
+            this.contenedorPrincipal.nativeElement.style.opacity = '1';
+            this.contenedorPrincipal.nativeElement.style.transform = 'translateY(0)';
 
-            this.personajeService.dibujarPersonajes(this.listaPersonajes);
-            this.personajeService.dibujarAuras(this.listaAuras);
-            this.personajeService.dibujarSalud(this.listaSalud);
+            //this.reproducirMusica();
+            this.dibujarPersonajesAuras(this.personajes, true);
+            this.dibujarPersonajesAuras(this.auras, false);
+            this.dibujarContenedorSaludDefensa('salud', 'Corazon');
+            this.dibujarContenedorSaludDefensa('defensa', 'Escudo');
+            this.dibujarContenedorAnimaciones();
 
-            Swal.close();
-
-        }, 500);
+            this.animacionesService.animarPersonajesPosturaInicial(this.personajes);
+            this.animacionesService.animarAurasInicial(this.auras);
+            
+        }, 1000);
     }
+    
+    /*reproducirMusica(): void {
 
-    reproducirMusica(): void {
-
-        const reproductorAudio: HTMLAudioElement = document.getElementById("reproductorAudio") as HTMLAudioElement;
         const segundosRestantes: number = 3;
 
-        reproductorAudio.addEventListener("timeupdate", () => {
+        this.reproductorAudio.nativeElement.addEventListener("timeupdate", () => {
 
-            if (reproductorAudio.duration - reproductorAudio.currentTime < segundosRestantes) {
+            if (this.reproductorAudio.nativeElement.duration - this.reproductorAudio.nativeElement.currentTime < segundosRestantes) {
 
-                reproductorAudio.currentTime = 0;
-                reproductorAudio.play();
+                this.reproductorAudio.nativeElement.currentTime = 0;
+                this.reproductorAudio.nativeElement.play();
             }
         });
-    } 
+    }*/ 
 
-    obtenerListaPersonajesOrdenada(): Personaje[] {
+    obtenerDimensionesContenedorEscenario(): { alto: number, ancho: number } {
 
-        const listaProvisoria: Personaje[] = [...this.listaPersonajes];
-        const listaPersonajesOrdenada: Personaje[] = listaProvisoria.sort((a, b) => b.iniciativa - a.iniciativa);    
+        const alto: number = this.contenedorEscenario.nativeElement.clientHeight;
+        const ancho: number = this.contenedorEscenario.nativeElement.clientWidth;
+        const dimensiones = { alto: alto, ancho: ancho };
 
-        return listaPersonajesOrdenada;
+        return dimensiones;
     }
 
-    obtenerListaPersonajesJugadoresOrdenada(): Personaje[] {
+    dibujarPersonajesAuras(lista: any[], personaje: boolean): void {
 
-        const listaProvisoria: Personaje[] = this.listaPersonajes.filter(x => x.equipo);
-        const listaPersonajesJugadoresOrdenada: Personaje[] = listaProvisoria.sort((a, b) => b.iniciativa - a.iniciativa);
+        const dimensiones: { alto: number, ancho: number } = this.obtenerDimensionesContenedorEscenario();
+        const altoContenedor: number = dimensiones.alto;
+        const anchoContenedor: number = dimensiones.ancho;
 
-        return listaPersonajesJugadoresOrdenada;
+        lista.forEach((x: Personaje | Aura) => {
+
+            const alto: number = Math.round((x.alto / 340) * altoContenedor);
+            const ancho: number = Math.round((x.ancho / 528) * anchoContenedor);
+            const coordenadaX: number = Math.round((x.coordenadaX / 528) * anchoContenedor);
+            const coordenadaY: number = Math.round((x.coordenadaY / 340) * altoContenedor);
+            const imagen: HTMLImageElement = document.createElement('img');
+
+            let identificador: string;
+            let opacidad: string;
+            let trasnformador: string = '';
+            let profunidad: string;
+            let cursor: string = '';
+
+            if (personaje) {
+
+                const personaje: Personaje = x as Personaje;
+
+                identificador = `personaje${x.identificador}`; 
+                profunidad = '1';                
+
+                if (personaje.saludActual > 0) { opacidad = '1'; } else { opacidad = '0'; }
+
+                if (!personaje.jugador) { trasnformador = 'scaleX(-1)'; }
+
+            } else {
+
+                identificador = `aura${x.identificador}`;                
+                opacidad = '0';
+                profunidad = '0';
+                cursor = 'none';
+            }
+
+            imagen.id = identificador;
+            imagen.src = x.imagen;
+            imagen.style.height = `${alto}px`;
+            imagen.style.imageRendering = 'pixelated';
+            imagen.style.left = `${coordenadaX}px`;
+            imagen.style.opacity = opacidad;            
+            imagen.style.pointerEvents = cursor; 
+            imagen.style.position = 'absolute';
+            imagen.style.top = `${coordenadaY}px`;
+            imagen.style.transform = trasnformador;
+            imagen.style.transition = 'opacity 0.5s ease';  
+            imagen.style.width = `${ancho}px`;
+            imagen.style.zIndex = profunidad;
+
+            this.contenedorEscenario.nativeElement.appendChild(imagen);
+        });
     }
-    
-    mostrarOcultarImagenAura(identificadorPersonaje: number, mostrarImagenAura: boolean): void {
 
-        const imagenAura: HTMLImageElement = document.getElementById(`imagenAura${ identificadorPersonaje }`) as HTMLImageElement;
+    dibujarContenedorSaludDefensa(saludDefensa: string, icono: string): void {
 
-        if (mostrarImagenAura) {
+        const dimensiones: { alto: number, ancho: number } = this.obtenerDimensionesContenedorEscenario();
+        const altoContenedor: number = dimensiones.alto;
+        const anchoContenedor: number = dimensiones.ancho;
 
-            reproducirSonido('movimientoCursor');
+        this.personajes.forEach(personaje => {
+
+            const contenedor: HTMLDivElement = document.createElement('div');           
+                        
+            let texto: string;
+            let provisoriaCoordenadaX: number = (personaje.coordenadaX);
+            let provisoriaCoordenadaY: number;
+            let color: string;
+            let filtro: string;
             
-            imagenAura.style.opacity = "1";
 
-        } else {
+            if (saludDefensa === 'salud') {
 
-            imagenAura.style.opacity = "0";
-        }
-    }
-
-    calcularResultadoAtaque(identificadorAtacante: number, identificadorDefensor: number): number {
-
-        const indicePersonajeAtacante: number = this.listaPersonajes.findIndex(personaje => personaje.identificador === identificadorAtacante);
-        const indicePersonajeDefensor: number = this.listaPersonajes.findIndex(personaje => personaje.identificador === identificadorDefensor);
-
-        if (this.listaPersonajes[indicePersonajeDefensor].salud > 0) {
-
-            const puntuacionAtaque: number = this.listaPersonajes[indicePersonajeAtacante].ataque;
-            const puntuacionDefensa: number = this.listaPersonajes[indicePersonajeDefensor].defensa;
-            const numeroAleatorio: number = generarNumeroAleatorio(1, 100);
-            const puntuacionTotal: number = (puntuacionAtaque + puntuacionDefensa);
-            const probabilidadDefensa: number = Math.round((puntuacionDefensa * 100) / puntuacionTotal);        
-
-            if (numeroAleatorio > probabilidadDefensa) {
-
-                const puntuacionDanio: number = generarNumeroAleatorio(1, this.listaPersonajes[indicePersonajeAtacante].danio);
-                const nuevaPuntuacionDefensa: number = (this.listaPersonajes[indicePersonajeDefensor].defensa--);
-
-                if (nuevaPuntuacionDefensa > 0) {
-
-                    this.listaPersonajes[indicePersonajeDefensor].defensa = nuevaPuntuacionDefensa;
-
-                } else {
-
-                    this.listaPersonajes[indicePersonajeDefensor].defensa = 0;
-                }
-
-                return puntuacionDanio;
+                texto = `${personaje.salud}/${personaje.saludActual}`;
+                provisoriaCoordenadaY = (personaje.coordenadaY - 42);
+                color = '#23B700';
+                filtro = 'brightness(0) saturate(100%) invert(49%) sepia(91%) saturate(2231%) hue-rotate(75deg)';
 
             } else {
 
-                return 0;
+                texto = `${personaje.defensa}/${personaje.defensaActual}`;
+                provisoriaCoordenadaY = (personaje.coordenadaY - 22);
+                color = '#0F70CE';
+                filtro = 'brightness(0) saturate(100%) invert(30%) sepia(86%) saturate(1120%) hue-rotate(186deg)';
             }
+
+            const coordenadaX: number = Math.round((provisoriaCoordenadaX / 528) * anchoContenedor);
+            const coordenadaY: number = Math.round((provisoriaCoordenadaY / 340) * altoContenedor);
+            const fragmentoParrafo: HTMLSpanElement = document.createElement('span');
+            const imagen: HTMLImageElement = document.createElement('img');
+            const rutaImagen: string = `assets/images/icons/${icono}.ico`; 
+
+            contenedor.id = `${saludDefensa}${personaje.identificador}`;
+            contenedor.style.borderRadius = '4px';
+            contenedor.style.color = color;
+            contenedor.style.fontFamily = 'Monaco';
+            contenedor.style.fontSize = '20px';
+            contenedor.style.fontWeight = 'bold';            
+            contenedor.style.height = '20px';
+            contenedor.style.left = `${coordenadaX}px`;
+            contenedor.style.lineHeight = '20px';
+            contenedor.style.opacity = '1';
+            contenedor.style.position = 'absolute';    
+            contenedor.style.textAlign = 'left';        
+            contenedor.style.top = `${coordenadaY}px`;
+            contenedor.style.transition = 'opacity 0.5s ease';            
+            contenedor.style.width = '100px';
+            contenedor.style.zIndex = '0';             
+            fragmentoParrafo.id = `${saludDefensa}FragmentoParrafo${personaje.identificador}`;
+            fragmentoParrafo.textContent = texto;
+            imagen.src = rutaImagen;
+            imagen.style.height = '75%';
+            imagen.style.width = '25%';
+            imagen.style.filter = filtro;
+
+            contenedor.appendChild(imagen);
+            contenedor.appendChild(fragmentoParrafo);
+
+            this.contenedorEscenario.nativeElement.appendChild(contenedor);
+        });
+    }  
+
+    dibujarContenedorAnimaciones(): void {
+
+        const dimensiones: { alto: number, ancho: number } = this.obtenerDimensionesContenedorEscenario();
+        const altoContenedor: number = dimensiones.alto;
+        const anchoContenedor: number = dimensiones.ancho;
+
+        this.personajes.forEach(personaje => {
+
+            const contenedor: HTMLDivElement = document.createElement('div');  
+            const alto: number = Math.round((personaje.alto / 340) * altoContenedor);
+            const ancho: number = Math.round((personaje.ancho / 528) * anchoContenedor);           
+
+            let coordenadaX: number;
+            let coordenadaY: number;
+
+            if (personaje.jugador) {
+
+                coordenadaX = Math.round(((personaje.coordenadaX + 64) / 528) * anchoContenedor);
+                coordenadaY = Math.round(((personaje.coordenadaY + 64) / 340) * altoContenedor);
+
+            } else { 
+
+                coordenadaX = Math.round(((personaje.coordenadaX - 32) / 528) * anchoContenedor);
+                coordenadaY = Math.round((personaje.coordenadaY / 340) * altoContenedor);
+            }
+
+            contenedor.id = `animacion${personaje.identificador}`;
+            contenedor.style.borderRadius = '4px';
+            contenedor.style.fontFamily = 'Monaco';
+            contenedor.style.fontSize = '40px';
+            contenedor.style.fontWeight = 'bold';            
+            contenedor.style.height = `${alto}px`;
+            contenedor.style.left = `${coordenadaX}px`;
+            contenedor.style.lineHeight = '40px';
+            contenedor.style.opacity = '1';
+            contenedor.style.pointerEvents = 'none'; 
+            contenedor.style.position = 'absolute';    
+            contenedor.style.textAlign = 'left';        
+            contenedor.style.top = `${coordenadaY}px`;
+            contenedor.style.transition = 'opacity 0.5s ease';            
+            contenedor.style.width = `${ancho}px`;
+            contenedor.style.zIndex = '1';   
+
+            this.contenedorEscenario.nativeElement.appendChild(contenedor);
+        });
+    }  
+
+    async mostrarPanelVictoriaDerrota(jugador: boolean) {
+
+        this.contenedorPrincipal.nativeElement.style.opacity = '0';
+
+        tiempoEspera(1000);
+
+        if (jugador) { 
+
+            Swal.fire({
+                allowEscapeKey: false,
+                allowOutsideClick: false,
+                backdrop: true,
+                icon: 'success',
+                html: `<h1 style="font-family: 'FuenteTextos';">VICTORIA</h1>`,
+                showCancelButton: false,
+                showCloseButton: true,
+                showConfirmButton: false
+            })
 
         } else {
 
-            return 0;
+            Swal.fire({
+                allowEscapeKey: false,
+                allowOutsideClick: false,
+                backdrop: true,
+                icon: 'error',
+                html: `<h1 style="font-family: 'FuenteTextos';">DERROTA</h1>`,
+                showCancelButton: false,
+                showCloseButton: true,
+                showConfirmButton: false
+            });
         }
     }
 
-    ocultarImagenesAuras(): void {
+    seleccionarObjetivo(identificadorPersonaje: number, nombrePersonaje: string): void {        
 
-        for (let i = 0; i < this.listaAuras.length; i++) {
+        this.animacionesService.borraPersonajes(this.personajes);
+        
+        this.auras.forEach(aura => { this.animacionesService.mostrarOcultarAura(this.personajes, aura.identificador, false) });
 
-            const imagenAura: HTMLImageElement = document.getElementById(`imagenAura${ this.listaAuras[i].identificador }`) as HTMLImageElement;
+        this.dibujarPersonajesAuras(this.personajes, true);
 
-            imagenAura.style.opacity = '0';
-        }
-    }   
-    
-    seleccionarObjetivo(identificadorPersonaje: number, nombrePersonaje: string): void {
-
+        const ataque: Ataque = new Ataque(this.identificadorPersonajeTurno, this.nombrePersonajeTurno, identificadorPersonaje, nombrePersonaje, 0, false, 1);
+        
+        this.acciones.push(ataque);       
+        
         reproducirSonido('seleccionar');
-
-        const puntuacionDanio: number = this.calcularResultadoAtaque(this.identificadorPersonajeTurno, identificadorPersonaje);
-        const ataque: Ataque = new Ataque(this.identificadorPersonajeTurno, this.nombrePersonajeTurno, identificadorPersonaje, nombrePersonaje, puntuacionDanio, 1);
-
-        this.listaAcciones.push(ataque);        
-
-        this.ocultarImagenesAuras();
-
-        this.personajeService.borrarPersonajes(this.listaPersonajes);
-        this.personajeService.dibujarPersonajes(this.listaPersonajes);
     }
 
-    seleccionarObjetivos(): void {
-
-        for (let i = 0; i < this.listaPersonajes.length; i++) {
-
-            const imagenPersonaje: HTMLImageElement = document.getElementById(`imagenPersonaje${ this.listaPersonajes[i].identificador }`) as HTMLImageElement;
-
-            if (!this.listaPersonajes[i].equipo && this.listaPersonajes[i].salud > 0) {
-
-                imagenPersonaje.style.cursor = 'pointer';
-                imagenPersonaje.addEventListener("mouseenter", () => this.mostrarOcultarImagenAura(this.listaPersonajes[i].identificador, true));
-                imagenPersonaje.addEventListener("mouseleave", () => this.mostrarOcultarImagenAura(this.listaPersonajes[i].identificador, false));
-                imagenPersonaje.addEventListener("click", () => { this.seleccionarObjetivo(this.listaPersonajes[i].identificador, this.listaPersonajes[i].nombre), this.terminarTurno() });
-
-            } else {
-
-                imagenPersonaje.style.opacity = '0.5';
-            }
-        }
-    }
-    
     async ejecutarAcciones(): Promise<void> {
 
         let numeroPersonajesJugadores: number = 0;
 
-        for (let i = 0; i < this.listaPersonajesJugadoresOrdenada.length; i++) {
-            
-            if (this.listaPersonajesJugadoresOrdenada[i].salud > 0) {
+        this.personajesJugadoresOrdenados.forEach(personaje => {
+
+            if (personaje.saludActual > 0) {
 
                 numeroPersonajesJugadores++
             }
-        }
+        });        
 
         if (numeroPersonajesJugadores === this.numeroAcciones) {
 
-            this.personajeService.borrarAnimacionPersonajes();
-
-            this.personajeService.borrarAnimacionReatroPersonaje();
-
             this.habilitarPanelControl = false;
 
-            for (let i = 0; i < this.listaAcciones.length; i++) {
+            this.personajes.forEach(x => {
+                
+                if (x.jugador === false && x.saludActual > 0) {
 
-                if (this.listaAcciones[i].tipo === 1) {
+                    const ataque: Ataque = this.mecanicasService.ataquePersonajeNoJugador(this.personajesOrdenados, x);
 
-                    const ataque: Ataque = this.listaAcciones[i] as Ataque;
+                    this.acciones.push(ataque);
+                }    
+            });
+            
+            for (let i = 0; i < this.acciones.length; i++) {
 
-                    this.personajeService.animarAtaque(this.listaPersonajes, ataque);
-                    this.personajeService.animarDefensaHerido(ataque);
+                if (this.acciones[i].tipo === 1) {
 
-                    await this.personajeService.animarDefensaSalud(ataque);
+                    const ataque: Ataque = this.acciones[i] as Ataque;
 
-                    await tiempoEsperaAnimacion(2000);                       
-                }                
+                    const personajeObjetivoAtaque = this.mecanicasService.verificarObjetivoAtaque(this.personajes, ataque);
+
+                    if (personajeObjetivoAtaque === null) {
+
+                        const condicionVictoria = this.mecanicasService.verificarCondicionVictoria(this.personajes);
+
+                        this.mostrarPanelVictoriaDerrota(condicionVictoria.jugador);
+
+                        return
+
+                    } else { 
+
+                        const personajeDefensor: Personaje = personajeObjetivoAtaque;
+
+                        ataque.identificadorDefensor = personajeDefensor.identificador;
+
+                        const resultadoAtaque = this.mecanicasService.calcularDanio(this.personajes, ataque);
+
+                        ataque.danio = resultadoAtaque.danio;
+                        ataque.critico = resultadoAtaque.critico;
+
+                        const dimensiones = this.obtenerDimensionesContenedorEscenario();
+
+                        await this.animacionesService.animarAtaque(dimensiones.alto, dimensiones.ancho, this.personajes, ataque);           
+
+                        this.mecanicasService.aplicarDanio(this.personajes, ataque);
+
+                        await this.animacionesService.animarSaludDefensa(this.personajes, ataque);
+
+                        if (personajeDefensor.saludActual === 0) { this.animacionesService.animarMuertePersonaje(personajeDefensor.identificador) }
+
+                        const condicionVictoria = this.mecanicasService.verificarCondicionVictoria(this.personajes);
+
+                        if (condicionVictoria.victoria) { this.mostrarPanelVictoriaDerrota(condicionVictoria.jugador); return }
+                    }                    
+
+                    await tiempoEspera(1000);
+                }
             }
 
-            this.personajeService.borrarPersonajes(this.listaPersonajes);
-            this.personajeService.dibujarPersonajes(this.listaPersonajes);
+            this.animacionesService.animarPersonajes = true;
+
+            this.acciones = [];
+
+            this.numeroAcciones = 0;
+
+            this.habilitarPanelControl = true;
 
         } else {
 
-            this.personajeService.animarImagenRetratoPersonajes(this.nombrePersonajeTurno);
             this.habilitarPanelControl = true;
         }
     }
 
     terminarTurno(): void {
 
-        const listaProvisoria: Personaje[] = [...this.listaPersonajesJugadoresOrdenada];
-        const listaPersonajesJugadoresOrdenada: Personaje[] = listaProvisoria.filter(x => x.salud > 0);
+        const copiaPersonajesJugadoresOrdenados: Personaje[] = [...this.personajesJugadoresOrdenados];
+        const personajesJugadoresOrdenados: Personaje[] = copiaPersonajesJugadoresOrdenados.filter(x => x.salud > 0);
 
-        if (listaPersonajesJugadoresOrdenada.length > 1) {
+        if (personajesJugadoresOrdenados.length > 1) {
 
-            const primeroPersonaje: Personaje = listaPersonajesJugadoresOrdenada[0];
+            const primerPersonaje: Personaje = personajesJugadoresOrdenados[0];
 
-            listaPersonajesJugadoresOrdenada[0] = listaPersonajesJugadoresOrdenada[1];
-            listaPersonajesJugadoresOrdenada.splice(1, 1);
-            listaPersonajesJugadoresOrdenada.push(primeroPersonaje);
+            personajesJugadoresOrdenados[0] = personajesJugadoresOrdenados[1];
+            personajesJugadoresOrdenados.splice(1, 1);
+            personajesJugadoresOrdenados.push(primerPersonaje);
 
-            this.listaPersonajesJugadoresOrdenada = listaPersonajesJugadoresOrdenada;
-            this.identificadorPersonajeTurno = listaPersonajesJugadoresOrdenada[0].identificador;
-            this.nombrePersonajeTurno = listaPersonajesJugadoresOrdenada[0].nombre;
-            this.saludPersonajeTurno = listaPersonajesJugadoresOrdenada[0].salud;            
+            this.personajesJugadoresOrdenados = personajesJugadoresOrdenados;
+            this.identificadorPersonajeTurno = this.personajesJugadoresOrdenados[0].identificador;
+            this.nombrePersonajeTurno = this.personajesJugadoresOrdenados[0].nombre;
+            this.saludPersonajeTurno = this.personajesJugadoresOrdenados[0].salud;
+            this.defensaPersonajeTurno = this.personajesJugadoresOrdenados[0].defensa;
         }
 
         this.numeroAcciones++
 
         this.ejecutarAcciones();
+    }
+
+    seleccionarObjetivos(): void {
+
+        this.habilitarPanelControl = false;
+
+        this.personajes.forEach(personaje => {
+
+            const identificadorImagenPersonaje: string = `personaje${personaje.identificador}`;
+            const imagenPersonaje: HTMLImageElement = document.getElementById(identificadorImagenPersonaje) as HTMLImageElement;
+
+            if (!personaje.jugador && personaje.salud > 0) {
+
+                imagenPersonaje.style.cursor = 'pointer';
+                imagenPersonaje.addEventListener('mouseenter', () => this.animacionesService.mostrarOcultarAura(this.personajes, personaje.identificador, true));
+                imagenPersonaje.addEventListener('mouseleave', () => this.animacionesService.mostrarOcultarAura(this.personajes, personaje.identificador, false));
+                imagenPersonaje.addEventListener('click', () => { this.seleccionarObjetivo(personaje.identificador, personaje.nombre), this.terminarTurno() });
+
+            } else {
+
+                imagenPersonaje.style.opacity = '0.5';
+            }
+        });
     }
 }
