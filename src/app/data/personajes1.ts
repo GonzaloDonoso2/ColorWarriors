@@ -21,9 +21,9 @@ export function obtenerPersonajesPrimeraEtapa(): Personaje[] {
     jugador: true,
     imagen: 'assets/images/personajes/posturas/inicial/Amarillo1.png',
     alto: 72,
-    ancho: 64,
+    ancho: 72,
     coordenadaX: 232,
-    coordenadaY: 48
+    coordenadaY: 178
   };
 
   const personaje2: Personaje = {
@@ -43,9 +43,9 @@ export function obtenerPersonajesPrimeraEtapa(): Personaje[] {
     jugador: true,
     imagen: 'assets/images/personajes/posturas/inicial/Azul1.png',
     alto: 72,
-    ancho: 64,
+    ancho: 72,
     coordenadaX: 168,
-    coordenadaY: 80
+    coordenadaY: 210
   };
 
   const personaje3: Personaje = {
@@ -65,9 +65,9 @@ export function obtenerPersonajesPrimeraEtapa(): Personaje[] {
     jugador: true,
     imagen: 'assets/images/personajes/posturas/inicial/Rojo1.png',
     alto: 72,
-    ancho: 64,
+    ancho: 72,
     coordenadaX: 104,
-    coordenadaY: 112
+    coordenadaY: 242
   };
 
   const personaje4: Personaje = {
@@ -87,9 +87,9 @@ export function obtenerPersonajesPrimeraEtapa(): Personaje[] {
     jugador: true,
     imagen: 'assets/images/personajes/posturas/inicial/Verde1.png',
     alto: 72,
-    ancho: 64,
+    ancho: 72,
     coordenadaX: 40,
-    coordenadaY: 144
+    coordenadaY: 274
   };
 
   const personaje5: Personaje = {
@@ -109,9 +109,9 @@ export function obtenerPersonajesPrimeraEtapa(): Personaje[] {
     jugador: false,
     imagen: 'assets/images/personajes/posturas/inicial/Morado1.png',
     alto: 72,
-    ancho: 64,
-    coordenadaX: 424,
-    coordenadaY: 144
+    ancho: 72,
+    coordenadaX: 420,
+    coordenadaY: 274
   };
 
   const personaje6: Personaje = {
@@ -132,8 +132,8 @@ export function obtenerPersonajesPrimeraEtapa(): Personaje[] {
     imagen: 'assets/images/personajes/posturas/inicial/Morado1.png',
     alto: 72,
     ancho: 64,
-    coordenadaX: 360,
-    coordenadaY: 176
+    coordenadaX: 356,
+    coordenadaY: 306
   };
 
   const personaje7: Personaje = {
@@ -153,9 +153,9 @@ export function obtenerPersonajesPrimeraEtapa(): Personaje[] {
     jugador: false,
     imagen: 'assets/images/personajes/posturas/inicial/Morado1.png',
     alto: 72,
-    ancho: 64,
-    coordenadaX: 296,
-    coordenadaY: 208
+    ancho: 72,
+    coordenadaX: 292,
+    coordenadaY: 338
   };
 
   const personaje8: Personaje = {
@@ -175,9 +175,9 @@ export function obtenerPersonajesPrimeraEtapa(): Personaje[] {
     jugador: false,
     imagen: 'assets/images/personajes/posturas/inicial/Morado1.png',
     alto: 72,
-    ancho: 64,
-    coordenadaX: 232,
-    coordenadaY: 240
+    ancho: 72,
+    coordenadaX: 228,
+    coordenadaY: 370
   };
 
   listaPersonajes.push(personaje1);

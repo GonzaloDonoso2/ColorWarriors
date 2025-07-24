@@ -1,21 +1,18 @@
 import { AfterViewInit, Component, ElementRef, ViewChild } from '@angular/core';
-import { PanelControlComponent } from '../panel-control/panel-control.component';
 import Swal from 'sweetalert2';
-import { Aura } from '../../models/aura.model';
 import { obtenerPersonajesPrimeraEtapa } from '../../data/personajes1';
 import { Personaje } from '../../models/personaje.model';
-import { obtenerListaAuras } from '../../data/auras';
 import { reproducirSonido } from '../../utils/utilidades';
 import { Accion } from '../../models/accion.model';
 import { Ataque } from '../../models/ataque.model';
 import { tiempoEspera } from '../../utils/utilidades';
 import { AnimacionesService } from '../../services/animaciones.service';
 import { MecanicasService } from '../../services/mecanicas.service';
+import { Victoria } from '../../models/victoria.model';
 
 @Component({
     selector: 'batalla',
     standalone: true,
-    imports: [PanelControlComponent],
     templateUrl: './batalla.component.html',
     styleUrl: './batalla.component.css'
 })
@@ -26,17 +23,10 @@ export class BatallaComponent implements AfterViewInit {
     @ViewChild('contenedorEscenario') contenedorEscenario!: ElementRef<HTMLDivElement>;
 
     personajes: Personaje[] = obtenerPersonajesPrimeraEtapa();
-    personajesOrdenados: Personaje[] = this.mecanicasService.obtenerPersonajesJugadoresOrdenados(this.personajes);
-    personajesJugadoresOrdenados: Personaje[] = this.mecanicasService.obtenerPersonajesJugadoresOrdenados(this.personajes);
-    auras: Aura[] = obtenerListaAuras();
-    identificadorPersonajeTurno: number = this.personajesJugadoresOrdenados[0].identificador;
-    nombrePersonajeTurno: string = this.personajesJugadoresOrdenados[0].nombre;
-    saludPersonajeTurno: number = this.personajesJugadoresOrdenados[0].salud;
-    defensaPersonajeTurno: number = this.personajesJugadoresOrdenados[0].defensa;
-    numeroAcciones: number = 0;
-    acciones: Accion[] = [];
-    habilitarPanelControl: boolean = true;
-    
+    personajesOrdenados: Personaje[] = this.mecanicasService.obtenerPersonajesOrdenados(this.personajes);
+    personajesJugadoresOrdenados: Personaje[] = this.mecanicasService.obtenerPersonajesJugadoresOrdenados(this.personajesOrdenados);
+    acciones: Accion[] = [];  
+
     constructor(        
         private mecanicasService: MecanicasService,
         private animacionesService: AnimacionesService
@@ -50,21 +40,23 @@ export class BatallaComponent implements AfterViewInit {
             this.contenedorPrincipal.nativeElement.style.transform = 'translateY(0)';
 
             //this.reproducirMusica();
-            this.dibujarPersonajesAuras(this.personajes, true);
-            this.dibujarPersonajesAuras(this.auras, false);
-            this.dibujarContenedorSaludDefensa('salud', 'Corazon');
-            this.dibujarContenedorSaludDefensa('defensa', 'Escudo');
-            this.dibujarContenedorAnimaciones();
+            this.dibujarPersonajes(this.personajesOrdenados);
+            this.dibujarAuras(this.personajesOrdenados);
+            this.dibujarContenedorAnimaciones(this.personajesOrdenados);
 
-            this.animacionesService.animarPersonajesPosturaInicial(this.personajes);
-            this.animacionesService.animarAurasInicial(this.auras);
+            this.personajesJugadoresOrdenados.forEach(personaje => { this.dibujarRetratoPersonaje(personaje) });
+            
+            this.dibujarBotonAtaque(this.personajesJugadoresOrdenados[0], this.personajesOrdenados);
+            
+            this.animacionesService.animarPersonajesPosturaInicial(this.personajesOrdenados);
+            this.animacionesService.animarAurasInicial(this.personajesOrdenados);
             
         }, 1000);
     }
     
     /*reproducirMusica(): void {
 
-        const segundosRestantes: number = 3;
+        const segundosRestantes: number = 2;
 
         this.reproductorAudio.nativeElement.addEventListener("timeupdate", () => {
 
@@ -85,156 +77,88 @@ export class BatallaComponent implements AfterViewInit {
         return dimensiones;
     }
 
-    dibujarPersonajesAuras(lista: any[], personaje: boolean): void {
+    dibujarPersonajes(personajes: Personaje[]): void {
 
         const dimensiones: { alto: number, ancho: number } = this.obtenerDimensionesContenedorEscenario();
         const altoContenedor: number = dimensiones.alto;
         const anchoContenedor: number = dimensiones.ancho;
 
-        lista.forEach((x: Personaje | Aura) => {
+        personajes.forEach(personaje => {
 
-            const alto: number = Math.round((x.alto / 340) * altoContenedor);
-            const ancho: number = Math.round((x.ancho / 528) * anchoContenedor);
-            const coordenadaX: number = Math.round((x.coordenadaX / 528) * anchoContenedor);
-            const coordenadaY: number = Math.round((x.coordenadaY / 340) * altoContenedor);
+            const alto: number = Math.round((personaje.alto / 528) * altoContenedor);
+            const ancho: number = Math.round((personaje.ancho / 528) * anchoContenedor);
+            const coordenadaX: number = Math.round((personaje.coordenadaX / 528) * anchoContenedor);
+            const coordenadaY: number = Math.round((personaje.coordenadaY / 528) * altoContenedor);
             const imagen: HTMLImageElement = document.createElement('img');
 
-            let identificador: string;
-            let opacidad: string;
+            let opacidad: string = '';
             let trasnformador: string = '';
-            let profunidad: string;
-            let cursor: string = '';
 
-            if (personaje) {
+            if (personaje.saludActual > 0) { opacidad = '1'; } else { opacidad = '0'; }
 
-                const personaje: Personaje = x as Personaje;
+            if (!personaje.jugador) { trasnformador = 'scaleX(-1)'; }
 
-                identificador = `personaje${x.identificador}`; 
-                profunidad = '1';                
-
-                if (personaje.saludActual > 0) { opacidad = '1'; } else { opacidad = '0'; }
-
-                if (!personaje.jugador) { trasnformador = 'scaleX(-1)'; }
-
-            } else {
-
-                identificador = `aura${x.identificador}`;                
-                opacidad = '0';
-                profunidad = '0';
-                cursor = 'none';
-            }
-
-            imagen.id = identificador;
-            imagen.src = x.imagen;
+            imagen.id = `personaje${personaje.identificador}`;
+            imagen.src = personaje.imagen;
             imagen.style.height = `${alto}px`;
             imagen.style.imageRendering = 'pixelated';
             imagen.style.left = `${coordenadaX}px`;
-            imagen.style.opacity = opacidad;            
-            imagen.style.pointerEvents = cursor; 
+            imagen.style.opacity = opacidad;    
             imagen.style.position = 'absolute';
             imagen.style.top = `${coordenadaY}px`;
             imagen.style.transform = trasnformador;
             imagen.style.transition = 'opacity 0.5s ease';  
             imagen.style.width = `${ancho}px`;
-            imagen.style.zIndex = profunidad;
+            imagen.style.zIndex = '1';
 
             this.contenedorEscenario.nativeElement.appendChild(imagen);
         });
     }
 
-    dibujarContenedorSaludDefensa(saludDefensa: string, icono: string): void {
+    dibujarAuras(personajes: Personaje[]): void {
 
         const dimensiones: { alto: number, ancho: number } = this.obtenerDimensionesContenedorEscenario();
         const altoContenedor: number = dimensiones.alto;
         const anchoContenedor: number = dimensiones.ancho;
 
-        this.personajes.forEach(personaje => {
+        personajes.forEach(personaje => {
 
-            const contenedor: HTMLDivElement = document.createElement('div');           
-                        
-            let texto: string;
-            let provisoriaCoordenadaX: number = (personaje.coordenadaX);
-            let provisoriaCoordenadaY: number;
-            let color: string;
-            let filtro: string;
-            
-
-            if (saludDefensa === 'salud') {
-
-                texto = `${personaje.salud}/${personaje.saludActual}`;
-                provisoriaCoordenadaY = (personaje.coordenadaY - 42);
-                color = '#23B700';
-                filtro = 'brightness(0) saturate(100%) invert(49%) sepia(91%) saturate(2231%) hue-rotate(75deg)';
-
-            } else {
-
-                texto = `${personaje.defensa}/${personaje.defensaActual}`;
-                provisoriaCoordenadaY = (personaje.coordenadaY - 22);
-                color = '#0F70CE';
-                filtro = 'brightness(0) saturate(100%) invert(30%) sepia(86%) saturate(1120%) hue-rotate(186deg)';
-            }
-
-            const coordenadaX: number = Math.round((provisoriaCoordenadaX / 528) * anchoContenedor);
-            const coordenadaY: number = Math.round((provisoriaCoordenadaY / 340) * altoContenedor);
-            const fragmentoParrafo: HTMLSpanElement = document.createElement('span');
+            const alto: number = Math.round((personaje.alto / 528) * altoContenedor);
+            const ancho: number = Math.round((personaje.ancho / 528) * anchoContenedor);
+            const coordenadaX: number = Math.round((personaje.coordenadaX / 528) * anchoContenedor);
+            const coordenadaY: number = (Math.round((personaje.coordenadaY / 528) * altoContenedor) + 9);
             const imagen: HTMLImageElement = document.createElement('img');
-            const rutaImagen: string = `assets/images/icons/${icono}.ico`; 
 
-            contenedor.id = `${saludDefensa}${personaje.identificador}`;
-            contenedor.style.borderRadius = '4px';
-            contenedor.style.color = color;
-            contenedor.style.fontFamily = 'Monaco';
-            contenedor.style.fontSize = '20px';
-            contenedor.style.fontWeight = 'bold';            
-            contenedor.style.height = '20px';
-            contenedor.style.left = `${coordenadaX}px`;
-            contenedor.style.lineHeight = '20px';
-            contenedor.style.opacity = '1';
-            contenedor.style.position = 'absolute';    
-            contenedor.style.textAlign = 'left';        
-            contenedor.style.top = `${coordenadaY}px`;
-            contenedor.style.transition = 'opacity 0.5s ease';            
-            contenedor.style.width = '100px';
-            contenedor.style.zIndex = '0';             
-            fragmentoParrafo.id = `${saludDefensa}FragmentoParrafo${personaje.identificador}`;
-            fragmentoParrafo.textContent = texto;
-            imagen.src = rutaImagen;
-            imagen.style.height = '75%';
-            imagen.style.width = '25%';
-            imagen.style.filter = filtro;
+            imagen.id = `aura${personaje.identificador}`;
+            imagen.src = 'assets/images/auras/1.png';
+            imagen.style.height = `${alto}px`;
+            imagen.style.imageRendering = 'pixelated';
+            imagen.style.left = `${coordenadaX}px`;
+            imagen.style.opacity = '0';
+            imagen.style.pointerEvents = 'none';
+            imagen.style.position = 'absolute';
+            imagen.style.top = `${coordenadaY}px`;
+            imagen.style.transition = 'opacity 0.5s ease';
+            imagen.style.width = `${ancho}px`;
+            imagen.style.zIndex = '0';
 
-            contenedor.appendChild(imagen);
-            contenedor.appendChild(fragmentoParrafo);
-
-            this.contenedorEscenario.nativeElement.appendChild(contenedor);
+            this.contenedorEscenario.nativeElement.appendChild(imagen);
         });
-    }  
+    }
 
-    dibujarContenedorAnimaciones(): void {
+    dibujarContenedorAnimaciones(personajes: Personaje[]): void {
 
         const dimensiones: { alto: number, ancho: number } = this.obtenerDimensionesContenedorEscenario();
         const altoContenedor: number = dimensiones.alto;
         const anchoContenedor: number = dimensiones.ancho;
 
-        this.personajes.forEach(personaje => {
+        personajes.forEach(personaje => {
 
             const contenedor: HTMLDivElement = document.createElement('div');  
-            const alto: number = Math.round((personaje.alto / 340) * altoContenedor);
+            const alto: number = Math.round((personaje.alto / 528) * altoContenedor);
             const ancho: number = Math.round((personaje.ancho / 528) * anchoContenedor);           
-
-            let coordenadaX: number;
-            let coordenadaY: number;
-
-            if (personaje.jugador) {
-
-                coordenadaX = Math.round(((personaje.coordenadaX + 64) / 528) * anchoContenedor);
-                coordenadaY = Math.round(((personaje.coordenadaY + 64) / 340) * altoContenedor);
-
-            } else { 
-
-                coordenadaX = Math.round(((personaje.coordenadaX - 32) / 528) * anchoContenedor);
-                coordenadaY = Math.round((personaje.coordenadaY / 340) * altoContenedor);
-            }
+            const coordenadaX: number = Math.round((personaje.coordenadaX / 528) * anchoContenedor);
+            const coordenadaY: number = (Math.round((personaje.coordenadaY / 528) * altoContenedor) - 32);
 
             contenedor.id = `animacion${personaje.identificador}`;
             contenedor.style.borderRadius = '4px';
@@ -257,13 +181,13 @@ export class BatallaComponent implements AfterViewInit {
         });
     }  
 
-    async mostrarPanelVictoriaDerrota(jugador: boolean) {
+    async mostrarPanelVictoriaDerrota(victoria: Victoria): Promise<void> {
 
         this.contenedorPrincipal.nativeElement.style.opacity = '0';
 
-        tiempoEspera(1000);
+        tiempoEspera(3000);
 
-        if (jugador) { 
+        if (victoria.jugador) { 
 
             Swal.fire({
                 allowEscapeKey: false,
@@ -291,24 +215,27 @@ export class BatallaComponent implements AfterViewInit {
         }
     }
 
-    seleccionarObjetivo(identificadorPersonaje: number, nombrePersonaje: string): void {        
+    seleccionarObjetivo(personajeDefensor: Personaje, personajeAtacante: Personaje): void {  
 
-        this.animacionesService.borraPersonajes(this.personajes);
+        this.animacionesService.borraPersonajes(this.personajesOrdenados);
+        this.animacionesService.mostrarOcultarAura(this.personajesOrdenados, personajeDefensor.identificador, false);
+
+        this.dibujarPersonajes(this.personajesOrdenados);
+
+        const ataque: Ataque = new Ataque(personajeAtacante, personajeDefensor, 0, false, 1);
         
-        this.auras.forEach(aura => { this.animacionesService.mostrarOcultarAura(this.personajes, aura.identificador, false) });
-
-        this.dibujarPersonajesAuras(this.personajes, true);
-
-        const ataque: Ataque = new Ataque(this.identificadorPersonajeTurno, this.nombrePersonajeTurno, identificadorPersonaje, nombrePersonaje, 0, false, 1);
-        
-        this.acciones.push(ataque);       
+        this.acciones.push(ataque);
         
         reproducirSonido('seleccionar');
     }
 
     async ejecutarAcciones(): Promise<void> {
 
-        let numeroPersonajesJugadores: number = 0;
+        const botonAtaque: HTMLButtonElement = document.getElementById('botonAtaque') as HTMLButtonElement;
+
+        botonAtaque.remove();
+
+        let numeroPersonajesJugadores: number = -1;
 
         this.personajesJugadoresOrdenados.forEach(personaje => {
 
@@ -318,84 +245,127 @@ export class BatallaComponent implements AfterViewInit {
             }
         });        
 
-        if (numeroPersonajesJugadores === this.numeroAcciones) {
+        if (numeroPersonajesJugadores < this.acciones.length) {
 
-            this.habilitarPanelControl = false;
+            this.animacionesService.animarPersonajes = false;
 
-            this.personajes.forEach(x => {
+            this.personajes.forEach(personaje => {
                 
-                if (x.jugador === false && x.saludActual > 0) {
+                if (personaje.jugador === false && personaje.saludActual > 0) {
 
-                    const ataque: Ataque = this.mecanicasService.ataquePersonajeNoJugador(this.personajesOrdenados, x);
+                    const ataque: Ataque = this.mecanicasService.ataquePersonajeNoJugador(this.personajesOrdenados, personaje);
 
                     this.acciones.push(ataque);
                 }    
             });
+
+            this.acciones = this.mecanicasService.obtenerAccionesOrdenados(this.acciones);
             
+            this.acciones.forEach(accion => {
+
+                if (accion.tipo === 1) {
+
+                    const ataque: Ataque = accion as Ataque;
+                    const personajeDefensor = this.mecanicasService.verificarObjetivoAtaque(this.personajesOrdenados, ataque); 
+
+                    if (personajeDefensor) {
+
+                        ataque.personajeDefensor = personajeDefensor;
+
+                        if (ataque.personajeAtacante.saludActual > 0) {
+
+                            const provisorioAtaque = this.mecanicasService.calcularDanio(this.personajesOrdenados, ataque);
+
+                            ataque.critico = provisorioAtaque.critico;
+                            ataque.danio = provisorioAtaque.danio;
+
+                            this.mecanicasService.aplicarDanio(this.personajesOrdenados, ataque);
+
+                        } else {
+
+                            accion.tipo = 2;
+                        }
+
+                    } else {
+
+                        accion.tipo = 3;
+                    }
+                }
+            });
+
             for (let i = 0; i < this.acciones.length; i++) {
 
                 if (this.acciones[i].tipo === 1) {
 
+                    const dimensiones = this.obtenerDimensionesContenedorEscenario();
                     const ataque: Ataque = this.acciones[i] as Ataque;
 
-                    const personajeObjetivoAtaque = this.mecanicasService.verificarObjetivoAtaque(this.personajes, ataque);
+                    this.animacionesService.animarAtaque(dimensiones.alto, dimensiones.ancho, this.personajesOrdenados, ataque);
+                    this.animacionesService.animarSaludDefensa(this.personajesOrdenados, ataque);
 
-                    if (personajeObjetivoAtaque === null) {
+                    const personaje = this.personajesOrdenados.find(personaje => personaje.identificador === ataque.personajeDefensor.identificador)!;
 
-                        const condicionVictoria = this.mecanicasService.verificarCondicionVictoria(this.personajes);
+                    if (personaje.saludActual === 0) {  }
 
-                        this.mostrarPanelVictoriaDerrota(condicionVictoria.jugador);
+                } else if (this.acciones[i].tipo === 2) {
 
-                        return
+                    const ataque: Ataque = this.acciones[i] as Ataque;
 
-                    } else { 
+                    if (ataque.personajeAtacante.saludActual === 0) { 
+                        
+                        this.animacionesService.animarMuertePersonaje(ataque.personajeAtacante.identificador);
+                    }
 
-                        const personajeDefensor: Personaje = personajeObjetivoAtaque;
+                    if (ataque.personajeDefensor.saludActual === 0) { 
+                        
+                        this.animacionesService.animarMuertePersonaje(ataque.personajeDefensor.identificador);
+                    }
 
-                        ataque.identificadorDefensor = personajeDefensor.identificador;
+                } else if (this.acciones[i].tipo === 3) {
 
-                        const resultadoAtaque = this.mecanicasService.calcularDanio(this.personajes, ataque);
+                    const victoria: Victoria = this.mecanicasService.verificarCondicionVictoria(this.personajesOrdenados);
 
-                        ataque.danio = resultadoAtaque.danio;
-                        ataque.critico = resultadoAtaque.critico;
+                    await this.mostrarPanelVictoriaDerrota(victoria);
 
-                        const dimensiones = this.obtenerDimensionesContenedorEscenario();
-
-                        await this.animacionesService.animarAtaque(dimensiones.alto, dimensiones.ancho, this.personajes, ataque);           
-
-                        this.mecanicasService.aplicarDanio(this.personajes, ataque);
-
-                        await this.animacionesService.animarSaludDefensa(this.personajes, ataque);
-
-                        if (personajeDefensor.saludActual === 0) { this.animacionesService.animarMuertePersonaje(personajeDefensor.identificador) }
-
-                        const condicionVictoria = this.mecanicasService.verificarCondicionVictoria(this.personajes);
-
-                        if (condicionVictoria.victoria) { this.mostrarPanelVictoriaDerrota(condicionVictoria.jugador); return }
-                    }                    
-
-                    await tiempoEspera(1000);
+                    return
                 }
+
+                await tiempoEspera(2000);
             }
 
-            this.animacionesService.animarPersonajes = true;
+            const victoria: Victoria = this.mecanicasService.verificarCondicionVictoria(this.personajesOrdenados);
+
+            if (victoria.estado) { this.mostrarPanelVictoriaDerrota(victoria); }
 
             this.acciones = [];
+            this.personajesOrdenados = this.mecanicasService.obtenerPersonajesOrdenados(this.personajesOrdenados);
+            this.personajesJugadoresOrdenados = this.mecanicasService.obtenerPersonajesJugadoresOrdenados(this.personajesJugadoresOrdenados);
 
-            this.numeroAcciones = 0;
+            this.personajesJugadoresOrdenados.forEach(personaje => {
 
-            this.habilitarPanelControl = true;
+                const identificadorRetratoPersonaje: string = `retratoPersonaje${personaje.identificador}`;
+                const retratoPersonaje: HTMLDivElement = document.getElementById(identificadorRetratoPersonaje) as HTMLDivElement;
+
+                retratoPersonaje.remove();
+
+                this.dibujarRetratoPersonaje(personaje);
+            });
+
+            this.animacionesService.animarPersonajes = true;
+            this.animacionesService.animarPersonajesPosturaInicial(this.personajesOrdenados);
+
+            this.dibujarBotonAtaque(this.personajesJugadoresOrdenados[0], this.personajesOrdenados);
 
         } else {
 
-            this.habilitarPanelControl = true;
+            this.dibujarBotonAtaque(this.personajesJugadoresOrdenados[0], this.personajesOrdenados);
         }
     }
 
     terminarTurno(): void {
 
         const copiaPersonajesJugadoresOrdenados: Personaje[] = [...this.personajesJugadoresOrdenados];
-        const personajesJugadoresOrdenados: Personaje[] = copiaPersonajesJugadoresOrdenados.filter(x => x.salud > 0);
+        const personajesJugadoresOrdenados: Personaje[] = copiaPersonajesJugadoresOrdenados.filter(x => x.saludActual > 0);
 
         if (personajesJugadoresOrdenados.length > 1) {
 
@@ -406,37 +376,238 @@ export class BatallaComponent implements AfterViewInit {
             personajesJugadoresOrdenados.push(primerPersonaje);
 
             this.personajesJugadoresOrdenados = personajesJugadoresOrdenados;
-            this.identificadorPersonajeTurno = this.personajesJugadoresOrdenados[0].identificador;
-            this.nombrePersonajeTurno = this.personajesJugadoresOrdenados[0].nombre;
-            this.saludPersonajeTurno = this.personajesJugadoresOrdenados[0].salud;
-            this.defensaPersonajeTurno = this.personajesJugadoresOrdenados[0].defensa;
         }
 
-        this.numeroAcciones++
+        this.personajesJugadoresOrdenados.forEach(personaje => { 
 
+            const identificadorRetratoPersonaje: string = `retratoPersonaje${personaje.identificador}`;
+            const retratoPersonaje: HTMLDivElement = document.getElementById(identificadorRetratoPersonaje) as HTMLDivElement;
+
+            retratoPersonaje.remove();
+            
+            this.dibujarRetratoPersonaje(personaje);        
+        });
+
+        this.dibujarBotonAtaque(this.personajesJugadoresOrdenados[0], this.personajesJugadoresOrdenados);
         this.ejecutarAcciones();
     }
 
-    seleccionarObjetivos(): void {
+    seleccionarObjetivos(personajes: Personaje[], personajeAtacante: Personaje): void {
 
-        this.habilitarPanelControl = false;
+        const botonAtaque: HTMLButtonElement = document.getElementById('botonAtaque') as HTMLButtonElement;
 
-        this.personajes.forEach(personaje => {
+        botonAtaque.remove();
 
-            const identificadorImagenPersonaje: string = `personaje${personaje.identificador}`;
+        personajes.forEach(personajeDefensor => {
+
+            const identificadorImagenPersonaje: string = `personaje${personajeDefensor.identificador}`;
             const imagenPersonaje: HTMLImageElement = document.getElementById(identificadorImagenPersonaje) as HTMLImageElement;
 
-            if (!personaje.jugador && personaje.salud > 0) {
+            if (!personajeDefensor.jugador && personajeDefensor.saludActual > 0) {
 
                 imagenPersonaje.style.cursor = 'pointer';
-                imagenPersonaje.addEventListener('mouseenter', () => this.animacionesService.mostrarOcultarAura(this.personajes, personaje.identificador, true));
-                imagenPersonaje.addEventListener('mouseleave', () => this.animacionesService.mostrarOcultarAura(this.personajes, personaje.identificador, false));
-                imagenPersonaje.addEventListener('click', () => { this.seleccionarObjetivo(personaje.identificador, personaje.nombre), this.terminarTurno() });
+                imagenPersonaje.addEventListener('mouseenter', () => this.animacionesService.mostrarOcultarAura(personajes, personajeDefensor.identificador, true));
+                imagenPersonaje.addEventListener('mouseleave', () => this.animacionesService.mostrarOcultarAura(personajes, personajeDefensor.identificador, false));
+                imagenPersonaje.addEventListener('click', () => { this.seleccionarObjetivo(personajeDefensor, personajeAtacante), this.terminarTurno() });
 
-            } else {
+            } else if (personajeDefensor.jugador && personajeDefensor.saludActual > 0) {
 
                 imagenPersonaje.style.opacity = '0.5';
             }
         });
+    }
+    
+    dibujarRetratoPersonaje(personaje: Personaje): void {    
+
+        let coordenadaX: number = 0;
+
+        switch (personaje.identificador) {
+
+            case 1:
+
+                coordenadaX = 2;
+
+                break;
+
+            case 2:
+
+                coordenadaX = 148;
+
+                break;
+
+            case 3:
+
+                coordenadaX = 294;
+
+                break;
+
+            case 4:
+
+                coordenadaX = 440;
+
+                break;
+        }
+        
+        const marcoContenedorParrafos: HTMLDivElement = document.createElement('div');
+        const contenedorParrafos: HTMLDivElement = document.createElement('div');
+        const imagen: HTMLImageElement = document.createElement('img');        
+        const iconoIniciativa: HTMLImageElement = document.createElement('img');
+        const iconoDefensa: HTMLImageElement = document.createElement('img');
+        const iconoSalud: HTMLImageElement = document.createElement('img');
+        const rutaIconoIniciativa: string = `assets/images/icons/Iniciativa.ico`;
+        const rutaIconoDefensa: string = `assets/images/icons/Escudo.ico`;         
+        const rutaIconoSalud: string = `assets/images/icons/Corazon.ico`;
+        const fragmentoParrafoNombre: HTMLSpanElement = document.createElement('span');
+        const fragmentoParrafoIniciativa: HTMLSpanElement = document.createElement('span');
+        const fragmentoParrafoDefensa: HTMLSpanElement = document.createElement('span');
+        const fragmentoParrafoSalud: HTMLSpanElement = document.createElement('span');  
+
+        let opacidad: string = '0';
+        
+        if (personaje.saludActual > 0) { opacidad = '0.5' } else { opacidad = '0.1' }
+        
+        marcoContenedorParrafos.id = `retratoPersonaje${personaje.identificador}`;    
+        marcoContenedorParrafos.style.backgroundColor = 'white';
+        marcoContenedorParrafos.style.borderRadius = '4px';
+        marcoContenedorParrafos.style.border = '2px solid white'; 
+        marcoContenedorParrafos.style.left = `${coordenadaX}px`;        
+        marcoContenedorParrafos.style.opacity = opacidad;
+        marcoContenedorParrafos.style.position = 'absolute';
+        marcoContenedorParrafos.style.transition = 'opacity 0.5s ease';
+        marcoContenedorParrafos.style.top = `2px`;
+        marcoContenedorParrafos.style.zIndex = '0';
+        
+        contenedorParrafos.style.color = 'white';
+        contenedorParrafos.style.backgroundColor = 'blue';
+        contenedorParrafos.style.borderRadius = '4px';
+        contenedorParrafos.style.fontFamily = 'Monaco';
+        contenedorParrafos.style.fontSize = '20px';
+        contenedorParrafos.style.height = '90px';
+        contenedorParrafos.style.lineHeight = '20px';
+        
+        contenedorParrafos.style.transition = 'opacity 0.5s ease';
+        contenedorParrafos.style.width = '140px';
+        contenedorParrafos.style.border = '1px solid gray';
+
+        marcoContenedorParrafos.appendChild(contenedorParrafos);
+
+        imagen.src = `assets/images/personajes/retratos/${personaje.nombre}.png`;;
+        imagen.style.height = '81px';
+        imagen.style.top = '4px';
+        imagen.style.left = '0px';
+        imagen.style.position = 'absolute';
+        imagen.style.imageRendering = 'pixelated';
+        imagen.style.width = '69px';
+        //imagen.style.border = '1px solid gray';
+       
+        iconoIniciativa.style.height = '20px';
+        iconoIniciativa.style.filter = 'brightness(0) saturate(100%) invert(85%) sepia(100%) saturate(5500%) hue-rotate(10deg) brightness(140%) contrast(120%)';
+        iconoIniciativa.style.width = '20px';
+        iconoIniciativa.src = rutaIconoIniciativa;
+        iconoIniciativa.style.top = '22px';
+        iconoIniciativa.style.left = '69px';
+        iconoIniciativa.style.position = 'absolute';
+        //iconoIniciativa.style.border = '1px solid green';
+
+        iconoDefensa.style.height = '20px';
+        iconoDefensa.style.filter = 'brightness(0) saturate(100%) invert(29%) sepia(97%) saturate(2736%) hue-rotate(183deg) brightness(100%) contrast(95%)';
+
+        iconoDefensa.style.width = '20px';
+        iconoDefensa.src = rutaIconoDefensa;
+        iconoDefensa.style.top = '42px';
+        iconoDefensa.style.left = '69px';
+        iconoDefensa.style.position = 'absolute';
+        //iconoDefensa.style.border = '1px solid green';
+       
+        iconoSalud.style.height = '20px';
+        iconoSalud.style.filter = 'brightness(0) saturate(100%) invert(11%) sepia(97%) saturate(7470%) hue-rotate(358deg) brightness(99%) contrast(113%)';
+        iconoSalud.style.width = '20px';
+        iconoSalud.src = rutaIconoSalud;
+        iconoSalud.style.top = '62px';
+        iconoSalud.style.left = '69px';
+        iconoSalud.style.position = 'absolute';
+        //iconoSalud.style.border = '1px solid white';
+
+        fragmentoParrafoNombre.id = 'nombrePersonajeturno';
+        fragmentoParrafoNombre.textContent = `${personaje.nombre}`;
+        fragmentoParrafoNombre.style.top = '0px';
+        fragmentoParrafoNombre.style.left = '69px';
+        fragmentoParrafoNombre.style.position = 'absolute';
+        //fragmentoParrafoNombre.style.border = '1px solid green';    
+
+        fragmentoParrafoIniciativa.id = 'iniciativaPersonajeTurno';
+        fragmentoParrafoIniciativa.textContent = `${personaje.iniciativa}/${personaje.iniciativaActual}`;
+        fragmentoParrafoIniciativa.style.top = '22px';
+        fragmentoParrafoIniciativa.style.left = '89px';
+        fragmentoParrafoIniciativa.style.position = 'absolute';
+        //fragmentoParrafoIniciativa.style.border = '1px solid blue';
+
+        fragmentoParrafoDefensa.id = 'defensaPersonajeTurno';
+        fragmentoParrafoDefensa.textContent = `${personaje.defensa}/${personaje.defensaActual}`;
+        fragmentoParrafoDefensa.style.top = '42px';
+        fragmentoParrafoDefensa.style.left = '89px';
+        fragmentoParrafoDefensa.style.position = 'absolute';
+        //fragmentoParrafoDefensa.style.border = '1px solid purple';
+
+        fragmentoParrafoSalud.appendChild(iconoSalud);
+        fragmentoParrafoSalud.id = 'saludPersonajeTurno';   
+        fragmentoParrafoSalud.textContent = `${personaje.salud}/${personaje.saludActual}`;
+        fragmentoParrafoSalud.style.top = '62px';
+        fragmentoParrafoSalud.style.left = '89px';
+        fragmentoParrafoSalud.style.position = 'absolute';
+        //fragmentoParrafoSalud.style.border = '1px solid white';
+        
+        contenedorParrafos.appendChild(imagen);
+        contenedorParrafos.appendChild(iconoIniciativa);
+        contenedorParrafos.appendChild(iconoDefensa);
+        contenedorParrafos.appendChild(iconoSalud);        
+        contenedorParrafos.appendChild(fragmentoParrafoNombre);
+        contenedorParrafos.appendChild(fragmentoParrafoIniciativa);
+        contenedorParrafos.appendChild(fragmentoParrafoDefensa);
+        contenedorParrafos.appendChild(fragmentoParrafoSalud);
+        
+        this.contenedorEscenario.nativeElement.appendChild(marcoContenedorParrafos);
+    }
+
+    dibujarBotonAtaque(personaje: Personaje, personajes: Personaje[]): void {
+
+        const idetnficadorRetratoPersonaje: string = `retratoPersonaje${personaje.identificador}`;
+        const retratoPersonaje: HTMLDivElement = document.getElementById(idetnficadorRetratoPersonaje) as HTMLDivElement;
+        const dimensiones: { alto: number, ancho: number } = this.obtenerDimensionesContenedorEscenario();        
+        const altoContenedor: number = dimensiones.alto;
+        const anchoContenedor: number = dimensiones.ancho;
+        const coordenadaX: number = (Math.round((personaje.coordenadaX / 528) * anchoContenedor) + 36);
+        const coordenadaY: number = (Math.round((personaje.coordenadaY / 528) * altoContenedor) - 32);
+        const boton: HTMLButtonElement = document.createElement('button');
+
+        retratoPersonaje.style.opacity = '1';
+        boton.id = 'botonAtaque';        
+        boton.textContent = 'Atacar';
+        boton.style.backgroundColor = 'red';
+        boton.style.borderColor = 'white';
+        boton.style.borderRadius = '4px';        
+        boton.style.color = 'white';
+        boton.style.fontFamily = 'Monaco';
+        boton.style.fontSize = '24px';
+        boton.style.height = '30px';
+        boton.style.left = `${coordenadaX}px`;
+        boton.style.lineHeight = '24px';
+        boton.style.opacity = '1';
+        boton.style.position = 'absolute';
+        boton.style.top = `${coordenadaY}px`;
+        boton.style.transition = 'opacity 0.5s ease';
+        boton.style.width = '100px';
+        boton.style.zIndex = '2';
+
+        this.contenedorEscenario.nativeElement.appendChild(boton);
+
+        boton.addEventListener('click', async () => {
+
+           reproducirSonido('seleccionar');    
+           
+           boton.style.opacity = '0';
+
+           this.seleccionarObjetivos(personajes, personaje);
+        });        
     }
 }
