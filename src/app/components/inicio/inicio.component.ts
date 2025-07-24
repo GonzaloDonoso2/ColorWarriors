@@ -23,7 +23,7 @@ export class InicioComponent implements OnInit{
       allowEscapeKey: false,   
       allowOutsideClick: false,    
       backdrop: true, 
-      icon: "error",
+      icon: 'error',
       html: `<h1 style="font-family: 'FuenteTextos';">Error</h1><p style="font-family: 'FuenteTextos';, font-size: '2rem';">Falta el nombre del jugador.</p>`, 
       showCancelButton: false,
       showCloseButton: true,
@@ -35,16 +35,18 @@ export class InicioComponent implements OnInit{
     
     reproducirSonido('seleccionar');
 
-    const campoNombreJugador: HTMLInputElement = document.getElementById("nombreJugador") as HTMLInputElement;
+    const campoNombreJugador: HTMLInputElement = document.getElementById('nombreJugador') as HTMLInputElement;
     const nombreJugador: string = campoNombreJugador.value;
 
-    if (nombreJugador.trim() !== "") {
+    if (nombreJugador.trim() !== '') {
 
-      this.contenedorFomulario.nativeElement.style.opacity = "0";
+      localStorage.setItem('nombre', nombreJugador);
+
+      this.contenedorFomulario.nativeElement.style.opacity = '0';
 
       setTimeout(() => {
 
-        this.router.navigate(["/batalla"]);             
+        this.router.navigate(['/batalla']);             
 
       }, 1000);         
 

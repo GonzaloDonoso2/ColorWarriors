@@ -49,19 +49,19 @@ export class MecanicasService {
 
     if (personajeA && personajeB) {
 
-      const victoria: Victoria = new Victoria(false, false, 2);
+      const victoria: Victoria = new Victoria(false, false);
 
       return  victoria;
 
     } else if (personajeA && !personajeB) {
 
-      const victoria: Victoria = new Victoria(true, true, 2);
+      const victoria: Victoria = new Victoria(true, true);
 
       return  victoria;
 
     } else if (!personajeA && personajeB) {
 
-      const victoria: Victoria = new Victoria(true, false, 2);
+      const victoria: Victoria = new Victoria(true, false);
 
       return  victoria;
 
@@ -94,7 +94,7 @@ export class MecanicasService {
     }
   }
 
-  calcularDanio(personajes: Personaje[], ataque: Ataque): { danio: number, critico: boolean } {
+  calcularDanio(personajes: Personaje[], ataque: Ataque): Ataque {
 
     const personajeAtacante = personajes.find(personaje => personaje.identificador === ataque.personajeAtacante.identificador)!;
     const personajeDefensor = personajes.find(personaje => personaje.identificador === ataque.personajeDefensor.identificador)!;
@@ -110,67 +110,67 @@ export class MecanicasService {
 
       if (probabilidadCritico > 79) {
 
-        const puntuacionDanio: number = (personajeAtacante.danioActual + 2);
-
-        return { danio: puntuacionDanio, critico: true };
+        ataque.danio = (personajeAtacante.danioActual + 2);
+        ataque.critico = true;
 
       } else {
 
-        const puntuacionDanio: number = generarNumeroAleatorio(1, personajeAtacante.danioActual);
-
-        return { danio: puntuacionDanio, critico: false };
+        ataque.danio = generarNumeroAleatorio(1, personajeAtacante.danioActual);
+        ataque.critico = false;
       }
 
     } else {
 
-      return { danio: 0, critico: false };
+      ataque.danio = 0;
+      ataque.critico = false;
     }
+
+    return ataque;
   }
 
-  aplicarDanio(personajes: Personaje[], ataque: Ataque): void {
+  aplicarDanio(personajes: Personaje[], ataque: Ataque): Personaje {
 
     const personaje = personajes.find(personaje => personaje.identificador === ataque.personajeDefensor.identificador)!;
 
-    if (personaje) {
+    if (ataque.danio > 0) {
 
-      if (ataque.danio > 0) {
+      const nuevaPuntuacionSalud: number = (personaje.saludActual - ataque.danio);
 
-        const nuevaPuntuacionSalud: number = (personaje.saludActual - ataque.danio);
+      if (nuevaPuntuacionSalud > 0) {
 
-        if (nuevaPuntuacionSalud > 0) {
-
-          personaje.saludActual = nuevaPuntuacionSalud;
-
-        } else {
-
-          personaje.saludActual = 0;
-        }
-
-        const nuevaPuntuacionIniciativa: number = (personaje.iniciativaActual - 2);
-
-        if (nuevaPuntuacionIniciativa > 0) {
-
-          personaje.iniciativaActual = nuevaPuntuacionIniciativa;
-
-        } else {
-
-          personaje.iniciativaActual = 0;
-        }
+        personaje.saludActual = nuevaPuntuacionSalud;
 
       } else {
 
-        const nuevaPuntuacionDefensa: number = (personaje.defensaActual - 2);
+        personaje.saludActual = 0;
+      }
 
-        if (nuevaPuntuacionDefensa > 0) {
+      const nuevaPuntuacionIniciativa: number = (personaje.iniciativaActual - 2);
 
-          personaje.defensaActual = nuevaPuntuacionDefensa;
+      if (nuevaPuntuacionIniciativa > 0) {
 
-        } else {
+        personaje.iniciativaActual = nuevaPuntuacionIniciativa;
 
-          personaje.defensaActual = 0
-        }
+      } else {
+
+        personaje.iniciativaActual = 0;
+      }
+
+    } else {
+
+      const nuevaPuntuacionDefensa: number = (personaje.defensaActual - 2);
+
+      if (nuevaPuntuacionDefensa > 0) {
+
+        personaje.defensaActual = nuevaPuntuacionDefensa;
+
+      } else {
+
+        personaje.defensaActual = 0
       }
     }
+
+    return personaje;
   }
 
   ataquePersonajeNoJugador(personajes: Personaje[], personajeA: Personaje): Ataque {
@@ -179,16 +179,8 @@ export class MecanicasService {
     const numeroPersonajesJugadores: number = personajesJugadores.length;
     const indicePersonajeJugador: number = generarNumeroAleatorio(0, (numeroPersonajesJugadores - 1));
     const personajeB: Personaje = personajesJugadores[indicePersonajeJugador];
-    const ataque: Ataque = new Ataque(personajeA, personajeB, 0, false, 1);
+    const ataque: Ataque = new Ataque(personajeA, personajeB, 0, false, 1, 0);
 
     return ataque;
   }
-
-  /*ataquePersonajeNoJugador(personajes: Personaje[], personajeA: Personaje): Ataque {
-
-    const personajeB = personajes.find(personaje => personaje.jugador === true && personaje.saludActual > 0)!;
-    const ataque: Ataque = new Ataque(personajeA, personajeB, 0, false, 1);
-
-    return ataque;
-  }*/
 }

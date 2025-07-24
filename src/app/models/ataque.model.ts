@@ -7,20 +7,19 @@ export class Ataque extends Accion {
     personajeDefensor: Personaje;
     danio: number;
     critico: boolean;
-    override tipo: number;
 
     constructor(
         personajeAtacante: Personaje,
         personajeDefensor: Personaje,
         danio: number,
         critico: boolean,
-        tipo: number
+        tipo: number,
+        resultado: number
     ) {
-        super(tipo);
+        super(tipo, resultado);
         this.personajeAtacante = personajeAtacante;
         this.personajeDefensor = personajeDefensor;
         this.danio = danio;
         this.critico = critico;
-        this.tipo = tipo;
     }
 }

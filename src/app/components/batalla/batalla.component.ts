@@ -9,6 +9,7 @@ import { tiempoEspera } from '../../utils/utilidades';
 import { AnimacionesService } from '../../services/animaciones.service';
 import { MecanicasService } from '../../services/mecanicas.service';
 import { Victoria } from '../../models/victoria.model';
+import { Router } from '@angular/router';
 
 @Component({
     selector: 'batalla',
@@ -28,6 +29,7 @@ export class BatallaComponent implements AfterViewInit {
     acciones: Accion[] = [];  
 
     constructor(        
+        private router: Router,
         private mecanicasService: MecanicasService,
         private animacionesService: AnimacionesService
     ) { }
@@ -66,7 +68,7 @@ export class BatallaComponent implements AfterViewInit {
                 this.reproductorAudio.nativeElement.play();
             }
         });
-    }*/ 
+    }*/
 
     obtenerDimensionesContenedorEscenario(): { alto: number, ancho: number } {
 
@@ -185,7 +187,9 @@ export class BatallaComponent implements AfterViewInit {
 
         this.contenedorPrincipal.nativeElement.style.opacity = '0';
 
-        tiempoEspera(3000);
+        const nombreJugador = localStorage.getItem('nombre');
+
+        await tiempoEspera(1000);
 
         if (victoria.jugador) { 
 
@@ -193,12 +197,17 @@ export class BatallaComponent implements AfterViewInit {
                 allowEscapeKey: false,
                 allowOutsideClick: false,
                 backdrop: true,
+                confirmButtonColor: 'green',
+                confirmButtonText: 'volver a Jugar',
                 icon: 'success',
-                html: `<h1 style="font-family: 'FuenteTextos';">VICTORIA</h1>`,
+                html: `<h1 style="font-family: 'FuenteTextos';">VICTORIA</h4><h1 style="font-family: 'FuenteTextos';">Felicidades ${nombreJugador}</h4>`,
                 showCancelButton: false,
-                showCloseButton: true,
-                showConfirmButton: false
-            })
+                showCloseButton: false,
+                showConfirmButton: true
+            }).then((result) => {
+
+                if (result.isConfirmed) { this.router.navigate(['']); }
+            });
 
         } else {
 
@@ -206,11 +215,16 @@ export class BatallaComponent implements AfterViewInit {
                 allowEscapeKey: false,
                 allowOutsideClick: false,
                 backdrop: true,
+                confirmButtonColor: 'green',
+                confirmButtonText: 'Volver a Jugar',
                 icon: 'error',
                 html: `<h1 style="font-family: 'FuenteTextos';">DERROTA</h1>`,
                 showCancelButton: false,
-                showCloseButton: true,
-                showConfirmButton: false
+                showCloseButton: false,
+                showConfirmButton: true
+            }).then((result) => {
+
+                if (result.isConfirmed) { this.router.navigate(['']); }
             });
         }
     }
@@ -222,7 +236,7 @@ export class BatallaComponent implements AfterViewInit {
 
         this.dibujarPersonajes(this.personajesOrdenados);
 
-        const ataque: Ataque = new Ataque(personajeAtacante, personajeDefensor, 0, false, 1);
+        const ataque: Ataque = new Ataque(personajeAtacante, personajeDefensor, 0, false, 1, 0);
         
         this.acciones.push(ataque);
         
@@ -235,18 +249,12 @@ export class BatallaComponent implements AfterViewInit {
 
         botonAtaque.remove();
 
-        let numeroPersonajesJugadores: number = -1;
+        let numeroPersonajesJugadoresActivos: number = 0;
 
-        this.personajesJugadoresOrdenados.forEach(personaje => {
+        this.personajesJugadoresOrdenados.forEach(personaje => { if (personaje.saludActual > 0) { numeroPersonajesJugadoresActivos++ } }); 
 
-            if (personaje.saludActual > 0) {
-
-                numeroPersonajesJugadores++
-            }
-        });        
-
-        if (numeroPersonajesJugadores < this.acciones.length) {
-
+        if (this.acciones.length === numeroPersonajesJugadoresActivos) {
+       
             this.animacionesService.animarPersonajes = false;
 
             this.personajes.forEach(personaje => {
@@ -265,8 +273,8 @@ export class BatallaComponent implements AfterViewInit {
 
                 if (accion.tipo === 1) {
 
-                    const ataque: Ataque = accion as Ataque;
-                    const personajeDefensor = this.mecanicasService.verificarObjetivoAtaque(this.personajesOrdenados, ataque); 
+                    let ataque: Ataque = accion as Ataque;
+                    let personajeDefensor = this.mecanicasService.verificarObjetivoAtaque(this.personajesOrdenados, ataque); 
 
                     if (personajeDefensor) {
 
@@ -274,21 +282,30 @@ export class BatallaComponent implements AfterViewInit {
 
                         if (ataque.personajeAtacante.saludActual > 0) {
 
-                            const provisorioAtaque = this.mecanicasService.calcularDanio(this.personajesOrdenados, ataque);
+                            ataque = this.mecanicasService.calcularDanio(this.personajesOrdenados, ataque);
+                            personajeDefensor = this.mecanicasService.aplicarDanio(this.personajesOrdenados, ataque);
 
-                            ataque.critico = provisorioAtaque.critico;
-                            ataque.danio = provisorioAtaque.danio;
+                            const indicePersonaje: number = this.personajesOrdenados.findIndex(personaje => personaje.identificador === ataque.personajeDefensor.identificador);
 
-                            this.mecanicasService.aplicarDanio(this.personajesOrdenados, ataque);
+                            this.personajesOrdenados[indicePersonaje] = personajeDefensor;
+
+                            if (this.personajesOrdenados[indicePersonaje].saludActual > 0) { 
+                                
+                                accion.resultado = 1;
+                            
+                            } else {
+
+                                accion.resultado = 2;
+                            };
 
                         } else {
 
-                            accion.tipo = 2;
+                            ataque.resultado = 3;
                         }
 
                     } else {
 
-                        accion.tipo = 3;
+                        ataque.resultado = 4;
                     }
                 }
             });
@@ -297,45 +314,47 @@ export class BatallaComponent implements AfterViewInit {
 
                 if (this.acciones[i].tipo === 1) {
 
+                    console.log('resultado de la accion: ' + this.acciones[i].resultado);
+
                     const dimensiones = this.obtenerDimensionesContenedorEscenario();
                     const ataque: Ataque = this.acciones[i] as Ataque;
 
-                    this.animacionesService.animarAtaque(dimensiones.alto, dimensiones.ancho, this.personajesOrdenados, ataque);
-                    this.animacionesService.animarSaludDefensa(this.personajesOrdenados, ataque);
+                    if (this.acciones[i].resultado === 1) {
 
-                    const personaje = this.personajesOrdenados.find(personaje => personaje.identificador === ataque.personajeDefensor.identificador)!;
+                        await this.animacionesService.animarAtaque(dimensiones.alto, dimensiones.ancho, this.personajesOrdenados, ataque);
+                        await this.animacionesService.animarSaludDefensa(this.personajesOrdenados, ataque);
 
-                    if (personaje.saludActual === 0) {  }
+                    } else if (this.acciones[i].resultado === 2) {
 
-                } else if (this.acciones[i].tipo === 2) {
+                        await this.animacionesService.animarAtaque(dimensiones.alto, dimensiones.ancho, this.personajesOrdenados, ataque);
+                        await this.animacionesService.animarSaludDefensa(this.personajesOrdenados, ataque);
 
-                    const ataque: Ataque = this.acciones[i] as Ataque;
+                        await this.animacionesService.animarInconcienciaPersonaje(ataque.personajeDefensor);
 
-                    if (ataque.personajeAtacante.saludActual === 0) { 
-                        
-                        this.animacionesService.animarMuertePersonaje(ataque.personajeAtacante.identificador);
+                    } else if (this.acciones[i].resultado === 3) {
+
+                        if (ataque.personajeAtacante.saludActual === 0) {
+
+                            await this.animacionesService.animarMuertePersonaje(ataque.personajeAtacante.identificador);
+                        }
+
+                        if (ataque.personajeDefensor.saludActual === 0) {
+
+                            await this.animacionesService.animarMuertePersonaje(ataque.personajeDefensor.identificador);
+                        }
+
+                    } else if (this.acciones[i].resultado === 4) {
+
+                        const victoria: Victoria = this.mecanicasService.verificarCondicionVictoria(this.personajesOrdenados);
+
+                        if (victoria.estado) { this.mostrarPanelVictoriaDerrota(victoria); }
+
+                        return
                     }
-
-                    if (ataque.personajeDefensor.saludActual === 0) { 
-                        
-                        this.animacionesService.animarMuertePersonaje(ataque.personajeDefensor.identificador);
-                    }
-
-                } else if (this.acciones[i].tipo === 3) {
-
-                    const victoria: Victoria = this.mecanicasService.verificarCondicionVictoria(this.personajesOrdenados);
-
-                    await this.mostrarPanelVictoriaDerrota(victoria);
-
-                    return
-                }
-
-                await tiempoEspera(2000);
+                } 
+                
+                await tiempoEspera(1000);
             }
-
-            const victoria: Victoria = this.mecanicasService.verificarCondicionVictoria(this.personajesOrdenados);
-
-            if (victoria.estado) { this.mostrarPanelVictoriaDerrota(victoria); }
 
             this.acciones = [];
             this.personajesOrdenados = this.mecanicasService.obtenerPersonajesOrdenados(this.personajesOrdenados);

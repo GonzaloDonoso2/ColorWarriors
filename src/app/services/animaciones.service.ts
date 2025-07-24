@@ -1,6 +1,5 @@
 import { Injectable } from '@angular/core';
 import { Personaje } from '../models/personaje.model';
-import { Aura } from '../models/aura.model';
 import { Ataque } from '../models/ataque.model';
 import { reproducirSonido } from '../utils/utilidades';
 import { tiempoEspera } from '../utils/utilidades';
@@ -226,18 +225,26 @@ export class AnimacionesService {
     const imagen: HTMLImageElement = document.createElement('img');
     const rutaIcono: string = `assets/images/icons/${icono}.ico`; 
     
-    imagen.style.height = '50%';
-    imagen.style.width = '50%';
+    imagen.style.height = '25%';
+    imagen.style.width = '25%';
     imagen.style.filter = filtro;
     imagen.src = rutaIcono;
 
     contenedorAnimacion.appendChild(imagen);
     contenedorAnimacion.style.opacity = '1';
 
-    await tiempoEspera(1000);
+    await tiempoEspera(500);
     
     contenedorAnimacion.style.opacity = '0';  
     contenedorAnimacion.innerHTML = '';  
+  }
+
+  async animarInconcienciaPersonaje(personaje: Personaje): Promise<void> {
+
+    const imagenPersonaje: HTMLImageElement = document.getElementById(`personaje${personaje.identificador}`) as HTMLImageElement;   
+    const rutaImagen: string = 'assets/images/personajes/posturas/herido/';
+
+    imagenPersonaje.src = `${rutaImagen}${personaje.nombre}5.png`;
   }
 
   async animarMuertePersonaje(identificadorPersonaje: number): Promise<void> {
