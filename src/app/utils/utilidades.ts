@@ -1,10 +1,10 @@
 export function reproducirSonido(nombreSonido: string) {
 
-    const rutaSonido: string = `assets/audios/${ nombreSonido }.wav`;
-    const sonido = new Audio(rutaSonido);
+  const rutaSonido: string = `assets/audios/${nombreSonido}.wav`;
+  const sonido = new Audio(rutaSonido);
 
-    sonido.volume = 0.1;
-    sonido.play();
+  sonido.volume = 0.1;
+  sonido.play();
 };
 
 export function tiempoEspera(miliSegundos: number): Promise<void> {

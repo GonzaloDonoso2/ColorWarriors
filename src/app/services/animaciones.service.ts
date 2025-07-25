@@ -65,25 +65,6 @@ export class AnimacionesService {
     }
   }
 
-  async animarRetratoPersonaje(nombrePersonajeTurno: string): Promise<void> {
-
-    const rutaImagen: string = 'assets/images/personajes/retratos/';
-
-    let numeroImagen: number = 1;
-
-    while (this.animarPersonajes) {
-
-      const identificadorImagen: string = 'imagenRetratoPersonaje';
-      const imagenRetratoPersonaje: HTMLImageElement = document.getElementById(identificadorImagen) as HTMLImageElement;
-
-      imagenRetratoPersonaje.src = `${rutaImagen}${nombrePersonajeTurno}${numeroImagen}.png`;
-
-      if (numeroImagen === 4) { numeroImagen = 1; } else { numeroImagen++ }
-
-      await tiempoEspera(250);
-    }
-  }
-
   borraPersonajes(personajes: Personaje[]): void {
 
     personajes.forEach(personaje => {
@@ -262,5 +243,35 @@ export class AnimacionesService {
     imagenPersonaje.style.pointerEvents = 'none'; 
     imagenAura.style.pointerEvents = 'none'; 
     contenedorAnimacion.style.pointerEvents = 'none'; 
+  }
+
+  animarRetratoPersonaje(personaje: Personaje): void {
+
+    const identificadorRetratoPersonaje: string = `retratoPersonaje${personaje.identificador}`;
+    const retratoPersonaje: HTMLDivElement = document.getElementById(identificadorRetratoPersonaje) as HTMLDivElement;
+
+    retratoPersonaje.style.opacity = '1';
+  }
+
+  borrarRetratosPersonajes(personajes: Personaje[]): void {
+
+    personajes.forEach(personaje => {
+
+      const identificadorRetratoPersonaje: string = `retratoPersonaje${personaje.identificador}`;
+      const retratoPersonaje: HTMLDivElement = document.getElementById(identificadorRetratoPersonaje) as HTMLDivElement;
+
+      retratoPersonaje.remove();
+    });
+  }
+
+  borrarBotones(): void {
+
+    const botonAtaque: HTMLButtonElement = document.getElementById('botonAtaque') as HTMLButtonElement;
+    //const botonHabilidadEspecial: HTMLButtonElement = document.getElementById('botonHabilidadEspecial') as HTMLButtonElement;
+    //const botonTerminarTurno: HTMLButtonElement = document.getElementById('botonTerminarTurno') as HTMLButtonElement;
+    
+    botonAtaque.remove();
+    //botonHabilidadEspecial.remove();
+    //botonTerminarTurno.remove();
   }
 }

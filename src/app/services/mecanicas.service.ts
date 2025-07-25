@@ -42,6 +42,66 @@ export class MecanicasService {
     return accionesOrdenados;
   }
 
+  verificarPersonajeAtacante(personajes: Personaje[], ataque: Ataque): boolean {
+    
+    const personajeOriginal = personajes.find(personaje => personaje.identificador === ataque.personajeAtacante.identificador && personaje.saludActual > 0);
+
+    if (personajeOriginal) {
+
+      return true; 
+
+    } else {
+
+      return false;
+    }
+  }
+
+  verificarPersonajesAtacantes(personajes: Personaje[], ataque: Ataque): boolean {
+    
+    const personajeOriginal = personajes.find(personaje => personaje.identificador === ataque.personajeAtacante.identificador && personaje.saludActual > 0);
+
+    if (personajeOriginal) {
+
+      return true; 
+
+    } else {
+
+      const personajeNuevo = personajes.find(personaje => personaje.jugador === ataque.personajeAtacante.jugador && personaje.saludActual > 0);
+
+      if (personajeNuevo) {
+
+        return true;
+
+      } else {
+
+        return false;
+      }
+    }
+  }
+
+  verificarObjetivoAtaque(personajes: Personaje[], ataque: Ataque): Personaje | null {
+    
+    const personajeOriginal = personajes.find(personaje => personaje.identificador === ataque.personajeDefensor.identificador)!;
+
+    if (personajeOriginal.saludActual > 0) {
+
+      return personajeOriginal; 
+
+    } else {
+
+      const personajeNuevo = personajes.find(personaje => personaje.jugador === personajeOriginal.jugador && personaje.saludActual > 0);
+
+      if (personajeNuevo) {
+
+        return personajeNuevo;
+
+      } else {
+
+        return null;
+      }
+    }
+  }
+  
   verificarCondicionVictoria(personajes: Personaje[]): Victoria{
 
     const personajeA = personajes.find(personaje => personaje.jugador === true && personaje.saludActual > 0);
@@ -68,29 +128,6 @@ export class MecanicasService {
     } else {
 
       throw new Error('No es posible un empate entre los dos equipos...'); 
-    }
-  }
-
-  verificarObjetivoAtaque(personajes: Personaje[], ataque: Ataque): Personaje | null {
-    
-    const personajeOriginal = personajes.find(personaje => personaje.identificador === ataque.personajeDefensor.identificador)!;
-
-    if (personajeOriginal.saludActual > 0) {
-
-      return personajeOriginal; 
-
-    } else {
-
-      const personajeNuevo = personajes.find(personaje => personaje.jugador === personajeOriginal.jugador && personaje.saludActual > 0);
-
-      if (personajeNuevo) {
-
-        return personajeNuevo;
-
-      } else {
-
-        return null;
-      }
     }
   }
 
@@ -183,4 +220,65 @@ export class MecanicasService {
 
     return ataque;
   }
+
+  resolverAcciones(acciones: Accion[], personajes: Personaje[]): { acciones: Accion[], personajes: Personaje[] } {
+
+    acciones = this.obtenerAccionesOrdenados(acciones);
+
+    acciones.forEach(accion => {
+
+      if (accion.tipo === 1) {
+
+        let ataque: Ataque = accion as Ataque;
+
+        const atacantesVerificados: boolean = this.verificarPersonajesAtacantes(personajes, ataque);
+
+        if (atacantesVerificados) {
+
+          const atacanteVerificado: boolean = this.verificarPersonajeAtacante(personajes, ataque);
+
+          if (atacanteVerificado) {
+
+            let personajeDefensor = this.verificarObjetivoAtaque(personajes, ataque);
+
+            if (personajeDefensor) {
+
+              ataque.personajeDefensor = personajeDefensor;
+
+              ataque = this.calcularDanio(personajes, ataque);
+              personajeDefensor = this.aplicarDanio(personajes, ataque);
+
+              const indicePersonaje: number = personajes.findIndex(personaje => personaje.identificador === ataque.personajeDefensor.identificador);
+
+              personajes[indicePersonaje] = personajeDefensor;
+
+              if (personajes[indicePersonaje].saludActual > 0) {
+
+                accion.resultado = 1;
+
+              } else {
+
+                accion.resultado = 2;
+              };
+
+            } else {
+
+              ataque.resultado = 4;
+            }
+
+          } else {
+
+            ataque.resultado = 3;
+          }
+
+        } else {
+
+          ataque.resultado = 4;
+        }
+      }
+    });
+
+    return { acciones, personajes };
+  }
 }
+

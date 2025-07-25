@@ -15,47 +15,10 @@
     z-index: 0;
 }
 
-/*#contenedorPanelControl {      
-    background-color: white;
-    border: 4px double gray;
-    border-radius: 4px;   
-    color: white; 
-    height: 40%;
-    margin: 0 auto; 
-    margin-top: 2px;
-    overflow: hidden;
-    position: relative; 
-    width: 100%;
-}*/
-
 #escenario {
     border-radius: 4px;
     height: 100%;
     image-rendering: pixelated;
     width: 100%;
     z-index:0;
-}
-
-#retratoPersonajeTurno {
-    height: 50px;
-    top: 2px;
-    left: 2px;
-    position: absolute;
-    image-rendering: pixelated;
-    width: 50px;
-    z-index: 1;
-}
-
-.contenedorPanelControl {      
-    background-color: white;
-    border: 4px double gray;
-    border-radius: 4px;   
-    color: white; 
-    height: 25%;
-    top: 8px; 
-    left: 8px;
-    margin-top: 2px;
-    overflow: hidden;
-    position: absolute; 
-    width: 25%;
 }
