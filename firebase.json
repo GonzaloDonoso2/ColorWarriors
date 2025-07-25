@@ -1,6 +1,6 @@
 {
   "hosting": {
-    "public": "dist/color-warriors",
+    "public": "dist/color-warriors/browser",
     "ignore": [
       "firebase.json",
       "**/.*",
