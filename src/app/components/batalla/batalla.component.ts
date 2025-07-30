@@ -1,4 +1,4 @@
-import { AfterViewInit, Component, ElementRef, ViewChild } from '@angular/core';
+import { AfterViewInit, Component, ElementRef, OnInit, ViewChild } from '@angular/core';
 import { Router } from '@angular/router';
 import Swal from 'sweetalert2';
 import { obtenerPersonajesPrimeraEtapa } from '../../data/personajes1';
@@ -11,6 +11,7 @@ import { AnimacionesService } from '../../services/animaciones.service';
 import { GraficosService } from '../../services/graficos.service';
 import { MecanicasService } from '../../services/mecanicas.service';
 import { reproducirSonido, tiempoEspera } from '../../utils/utilidades';
+import { GraficosTelefonoService } from '../../services/graficos-telefono.service';
 
 @Component({
     selector: 'batalla',
@@ -18,12 +19,13 @@ import { reproducirSonido, tiempoEspera } from '../../utils/utilidades';
     templateUrl: './batalla.component.html',
     styleUrl: './batalla.component.css'
 })
-export class BatallaComponent implements AfterViewInit {
+export class BatallaComponent implements AfterViewInit,  OnInit {   
 
-    @ViewChild('reproductorMusicaBatalla') reproductorMusicaBatalla!: ElementRef<HTMLAudioElement>;
+    //@ViewChild('reproductorMusicaBatalla') reproductorMusicaBatalla!: ElementRef<HTMLAudioElement>;
     @ViewChild('contenedorPrincipal') contenedorPrincipal!: ElementRef<HTMLDivElement>;
     @ViewChild('contenedorEscenario') contenedorEscenario!: ElementRef<HTMLDivElement>;
 
+    pantallaPC: boolean = true;
     personajes: Personaje[] = obtenerPersonajesPrimeraEtapa();
     personajesOrdenados: Personaje[] = this.mecanicasService.obtenerPersonajesOrdenados(this.personajes);
     personajesJugadoresOrdenados: Personaje[] = this.mecanicasService.obtenerPersonajesJugadoresOrdenados(this.personajesOrdenados);
@@ -33,8 +35,16 @@ export class BatallaComponent implements AfterViewInit {
         private router: Router,
         private mecanicasService: MecanicasService,        
         private graficosService: GraficosService,
+        private graficosTelefonoService: GraficosTelefonoService,
         private animacionesService: AnimacionesService
     ) { }
+    
+    ngOnInit(): void {
+
+        const anchoPantalla = window.innerWidth;
+
+        if (anchoPantalla <= 768) { this.pantallaPC = false }
+    }
 
     ngAfterViewInit(): void {
 
@@ -42,10 +52,13 @@ export class BatallaComponent implements AfterViewInit {
 
             this.contenedorPrincipal.nativeElement.style.opacity = '1';
             this.contenedorPrincipal.nativeElement.style.transform = 'translateY(0)';
-            this.reproductorMusicaBatalla.nativeElement.volume = 0.05; 
-            this.reproductorMusicaBatalla.nativeElement.play();
+            
+            //this.reproductorMusicaBatalla.nativeElement.volume = 0.05; 
+            //this.reproductorMusicaBatalla.nativeElement.play();
 
-            this.reproducirMusica();
+            //this.reproducirMusica();
+
+            this.animacionesService.redibujarEscenario(this.pantallaPC);
             this.dibujarPersonajesAurasContenedorAnimaciones();
             this.dibujarRetratosPersonajes();
             this.dibujarBotones();
@@ -56,7 +69,7 @@ export class BatallaComponent implements AfterViewInit {
         }, 1000);
     }
 
-    reproducirMusica(): void {
+    /*reproducirMusica(): void {
 
         const segundosRestantes: number = 0;
 
@@ -69,7 +82,7 @@ export class BatallaComponent implements AfterViewInit {
                 this.reproductorMusicaBatalla.nativeElement.play();
             }
         });
-    }
+    }*/
 
     obtenerDimensionesContenedorEscenario(): DimensionesEscenario {
 
@@ -84,9 +97,9 @@ export class BatallaComponent implements AfterViewInit {
 
         this.personajesOrdenados.forEach(personaje => {
 
-            const imagenPersonaje: HTMLImageElement = this.graficosService.dibujarPersonaje(dimensionesEscenario, personaje);
-            const imagenAura: HTMLImageElement = this.graficosService.dibujarAura(dimensionesEscenario, personaje);
-            const contenedorAnimacion: HTMLDivElement = this.graficosService.dibujarContenedorAnimacion(dimensionesEscenario, personaje);
+            const imagenPersonaje: HTMLImageElement = this.graficosService.dibujarPersonaje(this.pantallaPC, dimensionesEscenario, personaje);
+            const imagenAura: HTMLImageElement = this.graficosService.dibujarAura(this.pantallaPC, dimensionesEscenario, personaje);
+            const contenedorAnimacion: HTMLDivElement = this.graficosService.dibujarContenedorAnimacion(this.pantallaPC, dimensionesEscenario, personaje);
 
             this.contenedorEscenario.nativeElement.appendChild(imagenPersonaje);
             this.contenedorEscenario.nativeElement.appendChild(imagenAura);
@@ -96,9 +109,20 @@ export class BatallaComponent implements AfterViewInit {
 
     dibujarRetratosPersonajes(): void {
 
+        const dimensionesEscenario: DimensionesEscenario = this.obtenerDimensionesContenedorEscenario();
+
         this.personajesJugadoresOrdenados.forEach(personaje => {
 
-            const retratoPersonaje: HTMLDivElement = this.graficosService.dibujarRetratoPersonaje(personaje);
+            let retratoPersonaje: HTMLDivElement;
+
+            if (this.pantallaPC) {
+
+                retratoPersonaje = this.graficosService.dibujarRetratoPersonaje(dimensionesEscenario, personaje);
+
+            } else {
+
+                retratoPersonaje = this.graficosTelefonoService.dibujarRetratoPersonaje(dimensionesEscenario, personaje);
+            }            
 
             this.contenedorEscenario.nativeElement.appendChild(retratoPersonaje);
         });
@@ -110,7 +134,7 @@ export class BatallaComponent implements AfterViewInit {
 
         this.personajesOrdenados.forEach(personaje => {
 
-            const imagenPersonaje: HTMLImageElement = this.graficosService.dibujarPersonaje(dimensionesEscenario, personaje);
+            const imagenPersonaje: HTMLImageElement = this.graficosService.dibujarPersonaje(this.pantallaPC, dimensionesEscenario, personaje);
 
             this.contenedorEscenario.nativeElement.appendChild(imagenPersonaje);
         });
@@ -120,6 +144,8 @@ export class BatallaComponent implements AfterViewInit {
 
         this.animacionesService.borraPersonajes(this.personajesOrdenados);
         this.animacionesService.mostrarOcultarAura(this.personajesOrdenados, personajeDefensor.identificador, false);
+        
+        this.animacionesService.borrarContenedorAnimacion(this.personajesOrdenados);
 
         this.dibujarPersonajes()
 
@@ -130,49 +156,54 @@ export class BatallaComponent implements AfterViewInit {
         reproducirSonido('seleccionar');
     }
 
-    seleccionarObjetivosEnemigos(personajes: Personaje[], personajeAtacante: Personaje): void {
+    async seleccionarObjetivosEnemigos(personajes: Personaje[], personajeAtacante: Personaje): Promise<void> {        
 
-        this.animacionesService.borrarBotones();
+        this.animacionesService.borrarBotones(personajes);
 
-        personajes.forEach(personajeDefensor => {
+        for (let i = 0; i < personajes.length; i++) {
 
-            const identificadorImagenPersonaje: string = `personaje${personajeDefensor.identificador}`;
+            const identificadorImagenPersonaje: string = `personaje${personajes[i].identificador}`;
             const imagenPersonaje: HTMLImageElement = document.getElementById(identificadorImagenPersonaje) as HTMLImageElement;
 
-            if (!personajeDefensor.jugador && personajeDefensor.saludActual > 0) {
+            if (!personajes[i].jugador && personajes[i].saludActual > 0) {
+
+                await this.animacionesService.animarObjetivoAtaque(this.pantallaPC, personajes[i]);
+                this.animacionesService.mostrarOcultarAura(personajes, personajes[i].identificador, true)
 
                 imagenPersonaje.style.cursor = 'pointer';
-                imagenPersonaje.addEventListener('mouseenter', () => this.animacionesService.mostrarOcultarAura(personajes, personajeDefensor.identificador, true));
-                imagenPersonaje.addEventListener('mouseleave', () => this.animacionesService.mostrarOcultarAura(personajes, personajeDefensor.identificador, false));
-                imagenPersonaje.addEventListener('click', () => { this.seleccionarObjetivoEnemigo(personajeDefensor, personajeAtacante), this.terminarTurno() });
+                //imagenPersonaje.addEventListener('mouseenter', () => this.animacionesService.mostrarOcultarAura(personajes, personajeDefensor.identificador, true));
+                //imagenPersonaje.addEventListener('mouseleave', () => this.animacionesService.mostrarOcultarAura(personajes, personajeDefensor.identificador, false));
+                imagenPersonaje.addEventListener('click', () => { this.seleccionarObjetivoEnemigo(personajes[i], personajeAtacante), this.terminarTurno() });
 
-            } else if (personajeDefensor.jugador && personajeDefensor.saludActual > 0) {
+            } else if (personajes[i].jugador && personajes[i].saludActual > 0) {
 
                 imagenPersonaje.style.opacity = '0.5';
             }
-        });
+        }
     }
 
     dibujarBotones() {
 
         this.animacionesService.animarRetratoPersonaje(this.personajesJugadoresOrdenados[0]);
+        this.animacionesService.mostrarOcultarAura(this.personajesJugadoresOrdenados, this.personajesJugadoresOrdenados[0].identificador, true);
 
         const dimensionesEscenario: DimensionesEscenario = this.obtenerDimensionesContenedorEscenario();
-        const botonAtaque: HTMLButtonElement = this.graficosService.dibujarBotonAtaque(dimensionesEscenario, this.personajesJugadoresOrdenados[0]);
-        //const botonHabilidadEspecial: HTMLButtonElement = this.graficosService.dibujarBotonHabilidadEspecial(dimensionesEscenario, this.personajesJugadoresOrdenados[0]);
-        //const botonTerminarTurno: HTMLButtonElement = this.graficosService.dibujarBotonTerminarTurno(dimensionesEscenario, this.personajesJugadoresOrdenados[0]);
+
+        const botonAtaque: HTMLButtonElement = this.graficosService.dibujarBotonAtaque(this.pantallaPC, dimensionesEscenario, this.personajesJugadoresOrdenados[0]);
+        const botonHabilidadEspecial: HTMLButtonElement = this.graficosService.dibujarBotonHabilidadEspecial(this.pantallaPC, dimensionesEscenario, this.personajesJugadoresOrdenados[0]);
+        const botonTerminarTurno: HTMLButtonElement = this.graficosService.dibujarBotonTerminarTurno(this.pantallaPC, dimensionesEscenario, this.personajesJugadoresOrdenados[0]);
 
         this.contenedorEscenario.nativeElement.appendChild(botonAtaque);
-        //this.contenedorEscenario.nativeElement.appendChild(botonHabilidadEspecial);
-        //this.contenedorEscenario.nativeElement.appendChild(botonTerminarTurno);
+        this.contenedorEscenario.nativeElement.appendChild(botonHabilidadEspecial);
+        this.contenedorEscenario.nativeElement.appendChild(botonTerminarTurno);
 
         botonAtaque.addEventListener('click', async () => {
 
            reproducirSonido('seleccionar');    
            
            botonAtaque.style.opacity = '0';
-           //botonHabilidadEspecial.style.opacity = '0';
-           //botonTerminarTurno.style.opacity = '0';
+           botonHabilidadEspecial.style.opacity = '0';
+           botonTerminarTurno.style.opacity = '0';
 
            this.seleccionarObjetivosEnemigos(this.personajesOrdenados, this.personajesJugadoresOrdenados[0]);
         });     
@@ -180,10 +211,10 @@ export class BatallaComponent implements AfterViewInit {
 
     async mostrarPanelVictoriaDerrota(victoria: Victoria): Promise<void> {
 
-        this.reproductorMusicaBatalla.nativeElement.pause();        
-        this.reproductorMusicaBatalla.nativeElement.currentTime = 0;
-        this.reproductorMusicaBatalla.nativeElement.src = 'assets/audios/victoria.wav';
-        this.reproductorMusicaBatalla.nativeElement.play();
+        //this.reproductorMusicaBatalla.nativeElement.pause();        
+        //this.reproductorMusicaBatalla.nativeElement.currentTime = 0;
+        //this.reproductorMusicaBatalla.nativeElement.src = 'assets/audios/victoria.wav';
+        //this.reproductorMusicaBatalla.nativeElement.play();
         this.contenedorPrincipal.nativeElement.style.opacity = '0';        
 
         const nombreJugador = localStorage.getItem('nombre');
@@ -206,8 +237,8 @@ export class BatallaComponent implements AfterViewInit {
 
                 if (result.isConfirmed) { 
 
-                    this.reproductorMusicaBatalla.nativeElement.pause();        
-                    this.reproductorMusicaBatalla.nativeElement.currentTime = 0;
+                    //this.reproductorMusicaBatalla.nativeElement.pause();        
+                    //this.reproductorMusicaBatalla.nativeElement.currentTime = 0;
                     this.router.navigate(['']); 
                 }
             });
@@ -233,7 +264,7 @@ export class BatallaComponent implements AfterViewInit {
 
     async ejecutarAcciones(): Promise<void> {
 
-        this.animacionesService.borrarBotones();
+        this.animacionesService.borrarBotones(this.personajesOrdenados);
         this.animacionesService.borrarRetratosPersonajes(this.personajesJugadoresOrdenados);
         this.dibujarRetratosPersonajes();
 
@@ -268,7 +299,7 @@ export class BatallaComponent implements AfterViewInit {
 
                     if (this.acciones[i].resultado === 1) {
 
-                        await this.animacionesService.animarAtaque(dimensiones.alto, dimensiones.ancho, this.personajesOrdenados, ataque);
+                        await this.animacionesService.animarAtaque(this.pantallaPC, dimensiones, this.personajesOrdenados, ataque);
                         await this.animacionesService.animarSaludDefensa(this.personajesOrdenados, ataque);
 
                         if (ataque.personajeDefensor.jugador === true) {
@@ -280,7 +311,7 @@ export class BatallaComponent implements AfterViewInit {
                         
                     } else if (this.acciones[i].resultado === 2) {
 
-                        await this.animacionesService.animarAtaque(dimensiones.alto, dimensiones.ancho, this.personajesOrdenados, ataque);
+                        await this.animacionesService.animarAtaque(this.pantallaPC, dimensiones, this.personajesOrdenados, ataque);
                         await this.animacionesService.animarSaludDefensa(this.personajesOrdenados, ataque);
                         await this.animacionesService.animarInconcienciaPersonaje(ataque.personajeDefensor);
 

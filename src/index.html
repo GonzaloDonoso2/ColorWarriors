@@ -1,13 +1,97 @@
 <!doctype html>
 <html lang="en">
-<head>
-  <meta charset="utf-8">
-  <title>ColorWarriors</title>
-  <base href="/">
-  <meta name="viewport" content="width=device-width, initial-scale=1">
-  <link rel="icon" type="image/x-icon" href="assets/images/icons/favicon.ico">
-</head>
-<body>
-  <app-root></app-root>
-</body>
+  <head>
+    <meta charset="utf-8">
+    <title>ColorWarriors</title>
+    <base href="/">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <link rel="icon" type="image/x-icon" href="assets/images/icons/favicon.ico">
+    <link rel="preload" as="audio" href="assets/audios/aumento.wav"/>
+    <link rel="preload" as="audio" href="assets/audios/batalla.wav"/>
+    <link rel="preload" as="audio" href="assets/audios/curar.wav"/>
+    <link rel="preload" as="audio" href="assets/audios/error.mp3"/>
+    <link rel="preload" as="audio" href="assets/audios/golpe.wav"/>
+    <link rel="preload" as="audio" href="assets/audios/movimientoCursor.wav"/>
+    <link rel="preload" as="audio" href="assets/audios/seleccionar.wav"/>
+    <link rel="preload" as="audio" href="assets/audios/victoria.wav"/>
+    <link rel="preload" as="font" href="assets/fonts/VT323-Regular.ttf" type="font/ttf" crossorigin="anonymous">
+    <link rel="preload" as="image" href="assets/images/icons/Escudo.ico" type="image/x-icon">
+    <link rel="preload" as="image" href="assets/images/icons/Espada.ico" type="image/x-icon">
+    <link rel="preload" as="image" href="assets/images/icons/Corazon.ico" type="image/x-icon">
+    <link rel="preload" as="image" href="assets/images/icons/Critico.ico" type="image/x-icon">
+    <link rel="preload" as="image" href="assets/images/icons/Iniciativa.ico" type="image/x-icon">
+    <link rel="preload" as="image" href="assets/images/escenario.png"/>
+    <link rel="preload" as="image" href="assets/images/auras/amarillo/1.png"/>
+    <link rel="preload" as="image" href="assets/images/auras/amarillo/2.png"/>
+    <link rel="preload" as="image" href="assets/images/auras/amarillo/3.png"/>
+    <link rel="preload" as="image" href="assets/images/auras/amarillo/4.png"/>
+    <link rel="preload" as="image" href="assets/images/personajes/posturas/ataque/Amarillo1.png"/>
+    <link rel="preload" as="image" href="assets/images/personajes/posturas/ataque/Amarillo2.png"/>
+    <link rel="preload" as="image" href="assets/images/personajes/posturas/ataque/Amarillo3.png"/>
+    <link rel="preload" as="image" href="assets/images/personajes/posturas/ataque/Amarillo4.png"/>
+    <link rel="preload" as="image" href="assets/images/personajes/posturas/ataque/Azul1.png"/>
+    <link rel="preload" as="image" href="assets/images/personajes/posturas/ataque/Azul2.png"/>
+    <link rel="preload" as="image" href="assets/images/personajes/posturas/ataque/Azul3.png"/>
+    <link rel="preload" as="image" href="assets/images/personajes/posturas/ataque/Azul4.png"/>    
+    <link rel="preload" as="image" href="assets/images/personajes/posturas/ataque/Morado1.png"/>
+    <link rel="preload" as="image" href="assets/images/personajes/posturas/ataque/Morado2.png"/>
+    <link rel="preload" as="image" href="assets/images/personajes/posturas/ataque/Morado3.png"/>
+    <link rel="preload" as="image" href="assets/images/personajes/posturas/ataque/Morado4.png"/>
+    <link rel="preload" as="image" href="assets/images/personajes/posturas/ataque/Verde1.png"/>
+    <link rel="preload" as="image" href="assets/images/personajes/posturas/ataque/Verde2.png"/>
+    <link rel="preload" as="image" href="assets/images/personajes/posturas/ataque/Verde3.png"/>
+    <link rel="preload" as="image" href="assets/images/personajes/posturas/ataque/Verde4.png"/>
+    <link rel="preload" as="image" href="assets/images/personajes/posturas/ataque/Rojo1.png"/>
+    <link rel="preload" as="image" href="assets/images/personajes/posturas/ataque/Rojo2.png"/>
+    <link rel="preload" as="image" href="assets/images/personajes/posturas/ataque/Rojo3.png"/>
+    <link rel="preload" as="image" href="assets/images/personajes/posturas/ataque/Rojo4.png"/>
+    <link rel="preload" as="image" href="assets/images/personajes/posturas/herido/Amarillo1.png"/>
+    <link rel="preload" as="image" href="assets/images/personajes/posturas/herido/Amarillo2.png"/>
+    <link rel="preload" as="image" href="assets/images/personajes/posturas/herido/Amarillo3.png"/>
+    <link rel="preload" as="image" href="assets/images/personajes/posturas/herido/Amarillo4.png"/>
+    <link rel="preload" as="image" href="assets/images/personajes/posturas/herido/Amarillo5.png"/>
+    <link rel="preload" as="image" href="assets/images/personajes/posturas/herido/Azul1.png"/>
+    <link rel="preload" as="image" href="assets/images/personajes/posturas/herido/Azul2.png"/>
+    <link rel="preload" as="image" href="assets/images/personajes/posturas/herido/Azul3.png"/>
+    <link rel="preload" as="image" href="assets/images/personajes/posturas/herido/Azul4.png"/>
+    <link rel="preload" as="image" href="assets/images/personajes/posturas/herido/Azul5.png"/>    
+    <link rel="preload" as="image" href="assets/images/personajes/posturas/herido/Morado1.png"/>
+    <link rel="preload" as="image" href="assets/images/personajes/posturas/herido/Morado2.png"/>
+    <link rel="preload" as="image" href="assets/images/personajes/posturas/herido/Morado3.png"/>
+    <link rel="preload" as="image" href="assets/images/personajes/posturas/herido/Morado4.png"/>
+    <link rel="preload" as="image" href="assets/images/personajes/posturas/herido/Morado5.png"/>
+    <link rel="preload" as="image" href="assets/images/personajes/posturas/herido/Verde1.png"/>
+    <link rel="preload" as="image" href="assets/images/personajes/posturas/herido/Verde2.png"/>
+    <link rel="preload" as="image" href="assets/images/personajes/posturas/herido/Verde3.png"/>
+    <link rel="preload" as="image" href="assets/images/personajes/posturas/herido/Verde4.png"/>
+    <link rel="preload" as="image" href="assets/images/personajes/posturas/herido/Verde5.png"/>
+    <link rel="preload" as="image" href="assets/images/personajes/posturas/herido/Rojo1.png"/>
+    <link rel="preload" as="image" href="assets/images/personajes/posturas/herido/Rojo2.png"/>
+    <link rel="preload" as="image" href="assets/images/personajes/posturas/herido/Rojo3.png"/>
+    <link rel="preload" as="image" href="assets/images/personajes/posturas/herido/Rojo4.png"/>
+    <link rel="preload" as="image" href="assets/images/personajes/posturas/herido/Rojo5.png"/>
+    <link rel="preload" as="image" href="assets/images/personajes/posturas/defensa/Amarillo1.png"/>
+    <link rel="preload" as="image" href="assets/images/personajes/posturas/defensa/Amarillo2.png"/>
+    <link rel="preload" as="image" href="assets/images/personajes/posturas/defensa/Amarillo3.png"/>
+    <link rel="preload" as="image" href="assets/images/personajes/posturas/defensa/Amarillo4.png"/>
+    <link rel="preload" as="image" href="assets/images/personajes/posturas/defensa/Azul1.png"/>
+    <link rel="preload" as="image" href="assets/images/personajes/posturas/defensa/Azul2.png"/>
+    <link rel="preload" as="image" href="assets/images/personajes/posturas/defensa/Azul3.png"/>
+    <link rel="preload" as="image" href="assets/images/personajes/posturas/defensa/Azul4.png"/>    
+    <link rel="preload" as="image" href="assets/images/personajes/posturas/defensa/Morado1.png"/>
+    <link rel="preload" as="image" href="assets/images/personajes/posturas/defensa/Morado2.png"/>
+    <link rel="preload" as="image" href="assets/images/personajes/posturas/defensa/Morado3.png"/>
+    <link rel="preload" as="image" href="assets/images/personajes/posturas/defensa/Morado4.png"/>
+    <link rel="preload" as="image" href="assets/images/personajes/posturas/defensa/Verde1.png"/>
+    <link rel="preload" as="image" href="assets/images/personajes/posturas/defensa/Verde2.png"/>
+    <link rel="preload" as="image" href="assets/images/personajes/posturas/defensa/Verde3.png"/>
+    <link rel="preload" as="image" href="assets/images/personajes/posturas/defensa/Verde4.png"/>
+    <link rel="preload" as="image" href="assets/images/personajes/posturas/defensa/Rojo1.png"/>
+    <link rel="preload" as="image" href="assets/images/personajes/posturas/defensa/Rojo2.png"/>
+    <link rel="preload" as="image" href="assets/images/personajes/posturas/defensa/Rojo3.png"/>
+    <link rel="preload" as="image" href="assets/images/personajes/posturas/defensa/Rojo4.png"/>
+  </head>  
+  <body>
+    <app-root></app-root>
+  </body>
 </html>

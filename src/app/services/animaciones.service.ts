@@ -3,6 +3,7 @@ import { Personaje } from '../models/personaje.model';
 import { Ataque } from '../models/ataque.model';
 import { reproducirSonido } from '../utils/utilidades';
 import { tiempoEspera } from '../utils/utilidades';
+import { DimensionesEscenario } from '../models/dimensiones-escenario.model';
 
 @Injectable({
   providedIn: 'root'
@@ -17,6 +18,16 @@ export class AnimacionesService {
   identificadorAnimacionReatroPersonaje: number = 0;
 
   constructor() { }
+
+  redibujarEscenario(pantallaPC: boolean): void {
+
+    if (pantallaPC === false) {
+
+      const imagenEscenario: HTMLImageElement = document.getElementById('escenario') as HTMLImageElement;
+
+      imagenEscenario.src = 'assets/images/escenarioB.png';
+    }
+  }
 
   async animarPersonajesPosturaInicial(personajes: Personaje[]): Promise<void> {
 
@@ -45,7 +56,7 @@ export class AnimacionesService {
 
   async animarAurasInicial(personajes: Personaje[]): Promise<void> {
    
-    const rutaImagen: string = 'assets/images/auras/';
+    const rutaImagen: string = 'assets/images/auras/amarillo/';
 
     let numeroImagen: number = 1;
 
@@ -89,7 +100,7 @@ export class AnimacionesService {
 
       if (personaje.saludActual > 0) { 
         
-        reproducirSonido('movimientoCursor'); 
+        //reproducirSonido('movimientoCursor'); 
         
         imagenRetratoPersonaje.style.opacity = '0.9';      
       }  
@@ -100,28 +111,46 @@ export class AnimacionesService {
     }
   }
 
-  async animarAtaque(alto: number, ancho: number, personajes: Personaje[], ataque: Ataque): Promise<void> {
+  async animarAtaque(pantallaPC: boolean, dimensiones: DimensionesEscenario, personajes: Personaje[], ataque: Ataque): Promise<void> {
 
     const personajeAtacante = personajes.find(personaje => personaje.identificador === ataque.personajeAtacante.identificador)!;
     const personajeDefensor = personajes.find(personaje => personaje.identificador === ataque.personajeDefensor.identificador)!;
-    const atacanteCoordenadaX: number = Math.round((personajeAtacante.coordenadaX / 528) * ancho);
-    const atacanteCoordenadaY: number = Math.round((personajeAtacante.coordenadaY / 528) * alto);
-    const defensorCoordenadaX: number = personajeDefensor.coordenadaX;
-    const defensorCoordenadaY: number = personajeDefensor.coordenadaY;
-
+    const atacanteCoordenadaX: number = Math.round((personajeAtacante.coordenadaX / 528) * dimensiones.ancho);    
+    
+    let atacanteCoordenadaY: number;
     let coordenadaX: number;
     let coordenadaY: number;
 
-    if (personajeAtacante.jugador) {
+    if (pantallaPC) { 
 
-      coordenadaX = Math.round(((defensorCoordenadaX - 64) / 528) * ancho);
-      coordenadaY = Math.round(((defensorCoordenadaY - 32) / 528) * alto);
+      atacanteCoordenadaY =  Math.round((personajeAtacante.coordenadaY / 528) * dimensiones.alto);
+
+      if (personajeAtacante.jugador) {
+
+        coordenadaX = Math.round(((personajeDefensor.coordenadaX - 64) / 528) * dimensiones.ancho);
+        coordenadaY = Math.round(((personajeDefensor.coordenadaY - 32) / 528) * dimensiones.alto);
+
+      } else {
+
+        coordenadaX = Math.round(((personajeDefensor.coordenadaX + 64) / 528) * dimensiones.ancho);
+        coordenadaY = Math.round(((personajeDefensor.coordenadaY + 32) / 528) * dimensiones.alto);
+      }
 
     } else {
 
-      coordenadaX = Math.round(((defensorCoordenadaX + 64) / 528) * ancho);
-      coordenadaY = Math.round(((defensorCoordenadaY + 32) / 528) * alto);
-    }
+      atacanteCoordenadaY =  Math.round(((personajeAtacante.coordenadaY - 74) / 528) * dimensiones.alto);
+
+      if (personajeAtacante.jugador) {
+
+        coordenadaX = Math.round(((personajeDefensor.coordenadaX - 64) / 528) * dimensiones.ancho);
+        coordenadaY = Math.round((((personajeDefensor.coordenadaY - 74) - 32) / 528) * dimensiones.alto);
+
+      } else {
+        
+        coordenadaX = Math.round(((personajeDefensor.coordenadaX + 64) / 528) * dimensiones.ancho);
+        coordenadaY = Math.round((((personajeDefensor.coordenadaY - 74) + 32) / 528) * dimensiones.alto);
+      }
+    }  
 
     const imagenPersonajeAtacante: HTMLImageElement = document.getElementById(`personaje${ataque.personajeAtacante.identificador}`) as HTMLImageElement;
     const imagenPersonajeDefensor: HTMLImageElement = document.getElementById(`personaje${ataque.personajeDefensor.identificador}`) as HTMLImageElement;
@@ -200,14 +229,16 @@ export class AnimacionesService {
       }
     }
 
+    contenedorAnimacion.style.backgroundColor = 'transparent';
+    contenedorAnimacion.style.borderColor = 'transparent';
     contenedorAnimacion.style.color = color;
     contenedorAnimacion.textContent = texto;
 
     const imagen: HTMLImageElement = document.createElement('img');
     const rutaIcono: string = `assets/images/icons/${icono}.ico`; 
     
-    imagen.style.height = '25%';
-    imagen.style.width = '25%';
+    imagen.style.height = '30px';
+    imagen.style.width = '30px';
     imagen.style.filter = filtro;
     imagen.src = rutaIcono;
 
@@ -264,14 +295,69 @@ export class AnimacionesService {
     });
   }
 
-  borrarBotones(): void {
+  borrarAuras(personajes: Personaje[]): void {
+
+    personajes.forEach(personaje => {
+
+      this.mostrarOcultarAura(personajes, personaje.identificador, false);
+    });
+  }
+
+  borrarBotones(personajes: Personaje[]): void {
+
+    this.borrarAuras(personajes);
 
     const botonAtaque: HTMLButtonElement = document.getElementById('botonAtaque') as HTMLButtonElement;
-    //const botonHabilidadEspecial: HTMLButtonElement = document.getElementById('botonHabilidadEspecial') as HTMLButtonElement;
-    //const botonTerminarTurno: HTMLButtonElement = document.getElementById('botonTerminarTurno') as HTMLButtonElement;
+    const botonHabilidadEspecial: HTMLButtonElement = document.getElementById('botonHabilidadEspecial') as HTMLButtonElement;
+    const botonTerminarTurno: HTMLButtonElement = document.getElementById('botonTerminarTurno') as HTMLButtonElement;
     
     botonAtaque.remove();
-    //botonHabilidadEspecial.remove();
-    //botonTerminarTurno.remove();
+    botonHabilidadEspecial.remove();
+    botonTerminarTurno.remove();
+  }
+
+  async animarObjetivoAtaque(patallaPC: boolean, personaje: Personaje): Promise<void> {
+    
+    const contenedorAnimacion: HTMLDivElement = document.getElementById(`animacion${personaje.identificador}`) as HTMLDivElement;
+    const animacion: HTMLDivElement = document.createElement('div');    
+    
+    contenedorAnimacion.style.backgroundColor = 'white';
+    contenedorAnimacion.style.border = '2px solid white';    
+    contenedorAnimacion.style.borderRadius = '4px';
+    contenedorAnimacion.style.opacity = '0.5';
+    
+    animacion.style.alignItems = 'center'; 
+    animacion.style.backgroundColor = 'blue';       
+    animacion.style.border = '1px solid gray';
+    animacion.style.color = 'white';
+    animacion.style.display = 'flex';
+    animacion.style.fontSize = '20px';
+    animacion.style.height = '100%';
+    animacion.style.justifyContent = 'center';
+    animacion.style.textAlign = 'center';
+    animacion.style.width = '100%';
+
+    if (patallaPC) {
+
+      animacion.textContent = 'Seleccionar';
+
+    } else {
+
+      animacion.textContent = String.fromCodePoint(0x1F847);
+    }
+    
+    contenedorAnimacion.appendChild(animacion);    
+  }
+
+  borrarContenedorAnimacion(personajes: Personaje[]) {
+
+    personajes.forEach(personaje => {
+
+      const contenedorAnimacion: HTMLDivElement = document.getElementById(`animacion${personaje.identificador}`) as HTMLDivElement;
+
+      contenedorAnimacion.style.opacity = '0';
+      contenedorAnimacion.innerHTML = '';
+
+    });
   }
 }

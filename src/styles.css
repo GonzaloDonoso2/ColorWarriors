@@ -1,23 +1,12 @@
 body {
-    background-color: black;
-    color: white;
-    height: 100vh;
-    overflow: hidden;
-    width: 100vw;
+  background-color: black;
+  color: white;
+  height: 100vh;
+  overflow: hidden;
+  width: 100vw;
 }
 
 @font-face {
-    font-family: "FuenteTitulos";
-    src: url("../src/assets/fonts/fuenteTitulos.ttf") format("truetype");
-}  
-
-@font-face {
-    font-family: "FuenteTextos";
-    src: url("../src/assets/fonts/fuenteTextos.ttf") format("truetype");
+  font-family: 'VT323';
+  src: url('../src/assets/fonts/VT323-Regular.ttf') format('truetype');
 }
-
-@font-face {
-    font-family: "Monaco";
-    src: url("../src/assets/fonts/monaco.ttf") format("truetype");
-}
-
