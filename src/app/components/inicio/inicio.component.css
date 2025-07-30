@@ -1,4 +1,5 @@
 #contenedorFormulario {
+    font-family: 'VT323';
     height: 100vh;
     justify-content: center;
     text-align: center; 
@@ -13,16 +14,13 @@
 
 h1 {
     color: #D5A500;
-    font-family: "FuenteTitulos";
 }
 
 p {
-    font-family: "FuenteTextos";
     font-size: 1.5rem;
 }
 
 input {
-    font-family: "FuenteTextos";
     font-size: 1.5rem;
     margin: 0.5rem;
     text-align: center;
@@ -32,7 +30,6 @@ input {
 #botonStart {
     border-color: white;
     border-width: 4px;
-    font-family: "FuenteTextos";
     font-size: 1.5rem;
     width: 8rem;
 }  
