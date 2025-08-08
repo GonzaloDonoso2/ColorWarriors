@@ -1,4 +1,4 @@
-import { AfterViewInit, Component, ElementRef, OnInit, ViewChild } from '@angular/core';
+import { AfterViewInit, Component, ElementRef, HostListener, OnInit, ViewChild } from '@angular/core';
 import { Router } from '@angular/router';
 import Swal from 'sweetalert2';
 import { obtenerPersonajesPrimeraEtapa } from '../../data/personajes1';
@@ -11,7 +11,6 @@ import { AnimacionesService } from '../../services/animaciones.service';
 import { GraficosService } from '../../services/graficos.service';
 import { MecanicasService } from '../../services/mecanicas.service';
 import { reproducirSonido, tiempoEspera } from '../../utils/utilidades';
-import { GraficosTelefonoService } from '../../services/graficos-telefono.service';
 
 @Component({
     selector: 'batalla',
@@ -21,11 +20,12 @@ import { GraficosTelefonoService } from '../../services/graficos-telefono.servic
 })
 export class BatallaComponent implements AfterViewInit,  OnInit {   
 
-    //@ViewChild('reproductorMusicaBatalla') reproductorMusicaBatalla!: ElementRef<HTMLAudioElement>;
+    @ViewChild('reproductorMusicaBatalla') reproductorMusicaBatalla!: ElementRef<HTMLAudioElement>;
     @ViewChild('contenedorPrincipal') contenedorPrincipal!: ElementRef<HTMLDivElement>;
     @ViewChild('contenedorEscenario') contenedorEscenario!: ElementRef<HTMLDivElement>;
 
     pantallaPC: boolean = true;
+    pantallaHorizontal: boolean = false;
     personajes: Personaje[] = obtenerPersonajesPrimeraEtapa();
     personajesOrdenados: Personaje[] = this.mecanicasService.obtenerPersonajesOrdenados(this.personajes);
     personajesJugadoresOrdenados: Personaje[] = this.mecanicasService.obtenerPersonajesJugadoresOrdenados(this.personajesOrdenados);
@@ -35,15 +35,19 @@ export class BatallaComponent implements AfterViewInit,  OnInit {
         private router: Router,
         private mecanicasService: MecanicasService,        
         private graficosService: GraficosService,
-        private graficosTelefonoService: GraficosTelefonoService,
         private animacionesService: AnimacionesService
     ) { }
     
     ngOnInit(): void {
+        
+        if (window.innerWidth <= 768) { 
+            
+            this.pantallaPC = false;
 
-        const anchoPantalla = window.innerWidth;
+        } else if (window.innerHeight <= 450) {
 
-        if (anchoPantalla <= 768) { this.pantallaPC = false }
+            this.pantallaHorizontal = true;
+        }
     }
 
     ngAfterViewInit(): void {
@@ -53,23 +57,53 @@ export class BatallaComponent implements AfterViewInit,  OnInit {
             this.contenedorPrincipal.nativeElement.style.opacity = '1';
             this.contenedorPrincipal.nativeElement.style.transform = 'translateY(0)';
             
-            //this.reproductorMusicaBatalla.nativeElement.volume = 0.05; 
-            //this.reproductorMusicaBatalla.nativeElement.play();
+            this.reproductorMusicaBatalla.nativeElement.volume = 0.05; 
+            this.reproductorMusicaBatalla.nativeElement.play();
 
-            //this.reproducirMusica();
+            this.reproducirMusica();
 
-            this.animacionesService.redibujarEscenario(this.pantallaPC);
             this.dibujarPersonajesAurasContenedorAnimaciones();
             this.dibujarRetratosPersonajes();
             this.dibujarBotones();
+            this.dibujarRetratoPersonajeTurno();
+            //this.dibujarTextoBatalla();
             
+
+            this.animacionesService.animarPersonajes = true;
+            this.animacionesService.animarAuras = true;
+            this.animacionesService.animarPersonajePosturaObjetivo = false;            
             this.animacionesService.animarPersonajesPosturaInicial(this.personajesOrdenados);
             this.animacionesService.animarAurasInicial(this.personajesOrdenados);
             
         }, 1000);
     }
 
-    /*reproducirMusica(): void {
+    @HostListener('window:resize')
+    onResize(): void {
+
+        this.redimencionarDibujos();        
+    }
+
+    redimencionarDibujos(): void {
+
+        if (window.innerWidth <= 768) {
+
+            this.pantallaPC = false;
+
+        } else if (window.innerHeight <= 800) {
+
+            this.pantallaHorizontal = true;
+        }
+
+        this.dibujarPersonajesAurasContenedorAnimaciones();
+        this.dibujarRetratosPersonajes();
+        this.dibujarBotones();
+        this.dibujarRetratoPersonajeTurno();
+    }      
+
+    
+
+    reproducirMusica(): void {
 
         const segundosRestantes: number = 0;
 
@@ -82,7 +116,7 @@ export class BatallaComponent implements AfterViewInit,  OnInit {
                 this.reproductorMusicaBatalla.nativeElement.play();
             }
         });
-    }*/
+    }
 
     obtenerDimensionesContenedorEscenario(): DimensionesEscenario {
 
@@ -97,9 +131,9 @@ export class BatallaComponent implements AfterViewInit,  OnInit {
 
         this.personajesOrdenados.forEach(personaje => {
 
-            const imagenPersonaje: HTMLImageElement = this.graficosService.dibujarPersonaje(this.pantallaPC, dimensionesEscenario, personaje);
-            const imagenAura: HTMLImageElement = this.graficosService.dibujarAura(this.pantallaPC, dimensionesEscenario, personaje);
-            const contenedorAnimacion: HTMLDivElement = this.graficosService.dibujarContenedorAnimacion(this.pantallaPC, dimensionesEscenario, personaje);
+            const imagenPersonaje: HTMLImageElement = this.graficosService.dibujarPersonaje(dimensionesEscenario, personaje);
+            const imagenAura: HTMLImageElement = this.graficosService.dibujarAura(dimensionesEscenario, personaje);
+            const contenedorAnimacion: HTMLDivElement = this.graficosService.dibujarDanio(dimensionesEscenario, personaje);
 
             this.contenedorEscenario.nativeElement.appendChild(imagenPersonaje);
             this.contenedorEscenario.nativeElement.appendChild(imagenAura);
@@ -113,19 +147,28 @@ export class BatallaComponent implements AfterViewInit,  OnInit {
 
         this.personajesJugadoresOrdenados.forEach(personaje => {
 
-            let retratoPersonaje: HTMLDivElement;
-
-            if (this.pantallaPC) {
-
-                retratoPersonaje = this.graficosService.dibujarRetratoPersonaje(dimensionesEscenario, personaje);
-
-            } else {
-
-                retratoPersonaje = this.graficosTelefonoService.dibujarRetratoPersonaje(dimensionesEscenario, personaje);
-            }            
+            const retratoPersonaje: HTMLDivElement = this.graficosService.dibujarRetratoPersonaje(this.pantallaPC, this.pantallaHorizontal, dimensionesEscenario, personaje);
 
             this.contenedorEscenario.nativeElement.appendChild(retratoPersonaje);
         });
+    }
+
+    dibujarRetratoPersonajeTurno(): void {
+
+        const dimensionesEscenario: DimensionesEscenario = this.obtenerDimensionesContenedorEscenario();
+        
+        const retratoPersonajeTurno: HTMLDivElement = this.graficosService.dibujarRetratoPersonajeTurno(this.pantallaPC, this.pantallaHorizontal, dimensionesEscenario, this.personajesJugadoresOrdenados[0]);
+
+        this.contenedorEscenario.nativeElement.appendChild(retratoPersonajeTurno);
+    }
+
+    dibujarTextoBatalla(): void {
+
+        const dimensionesEscenario: DimensionesEscenario = this.obtenerDimensionesContenedorEscenario();
+
+        const textoBatalla: HTMLDivElement = this.graficosService.dibujarTextoBatalla(this.pantallaPC, dimensionesEscenario);
+
+        this.contenedorEscenario.nativeElement.appendChild(textoBatalla);
     }
 
     dibujarPersonajes(): void {
@@ -134,7 +177,7 @@ export class BatallaComponent implements AfterViewInit,  OnInit {
 
         this.personajesOrdenados.forEach(personaje => {
 
-            const imagenPersonaje: HTMLImageElement = this.graficosService.dibujarPersonaje(this.pantallaPC, dimensionesEscenario, personaje);
+            const imagenPersonaje: HTMLImageElement = this.graficosService.dibujarPersonaje(dimensionesEscenario, personaje);
 
             this.contenedorEscenario.nativeElement.appendChild(imagenPersonaje);
         });
@@ -142,10 +185,8 @@ export class BatallaComponent implements AfterViewInit,  OnInit {
 
     seleccionarObjetivoEnemigo(personajeDefensor: Personaje, personajeAtacante: Personaje): void {
 
-        this.animacionesService.borraPersonajes(this.personajesOrdenados);
-        this.animacionesService.mostrarOcultarAura(this.personajesOrdenados, personajeDefensor.identificador, false);
-        
-        this.animacionesService.borrarContenedorAnimacion(this.personajesOrdenados);
+        this.animacionesService.animarPersonajePosturaObjetivo = false;
+        this.animacionesService.borraPersonajes(this.personajesOrdenados);       
 
         this.dibujarPersonajes()
 
@@ -156,19 +197,17 @@ export class BatallaComponent implements AfterViewInit,  OnInit {
         reproducirSonido('seleccionar');
     }
 
-    async seleccionarObjetivosEnemigos(personajes: Personaje[], personajeAtacante: Personaje): Promise<void> {        
-
-        this.animacionesService.borrarBotones(personajes);
+    async seleccionarObjetivosEnemigos(personajes: Personaje[], personajeAtacante: Personaje): Promise<void> {     
 
         for (let i = 0; i < personajes.length; i++) {
 
             const identificadorImagenPersonaje: string = `personaje${personajes[i].identificador}`;
             const imagenPersonaje: HTMLImageElement = document.getElementById(identificadorImagenPersonaje) as HTMLImageElement;
+            this.animacionesService.animarPersonajePosturaObjetivo = true;
 
             if (!personajes[i].jugador && personajes[i].saludActual > 0) {
 
-                await this.animacionesService.animarObjetivoAtaque(this.pantallaPC, personajes[i]);
-                this.animacionesService.mostrarOcultarAura(personajes, personajes[i].identificador, true)
+                this.animacionesService.animarObjetivoAtaque(personajes[i]);
 
                 imagenPersonaje.style.cursor = 'pointer';
                 //imagenPersonaje.addEventListener('mouseenter', () => this.animacionesService.mostrarOcultarAura(personajes, personajeDefensor.identificador, true));
@@ -182,28 +221,54 @@ export class BatallaComponent implements AfterViewInit,  OnInit {
         }
     }
 
+    abiliatarBotones(): void {
+
+        const botonAtaque: HTMLButtonElement = document.getElementById('botonAtaque') as HTMLButtonElement;
+        const botonHabilidadEspecial: HTMLButtonElement = document.getElementById('botonHabilidadEspecial') as HTMLButtonElement;
+        const botonTerminarTurno: HTMLButtonElement = document.getElementById('botonTerminarTurno') as HTMLButtonElement;
+
+        botonAtaque.style.backgroundColor = 'red';
+        botonAtaque.disabled = false;
+        botonHabilidadEspecial.style.backgroundColor = 'green';
+        botonHabilidadEspecial.disabled = false;
+        botonTerminarTurno.style.backgroundColor = '#FF6A00';
+        botonTerminarTurno.disabled = false;
+    }
+
+    desahabiliatarBotones(): void {
+
+        const botonAtaque: HTMLButtonElement = document.getElementById('botonAtaque') as HTMLButtonElement;
+        const botonHabilidadEspecial: HTMLButtonElement = document.getElementById('botonHabilidadEspecial') as HTMLButtonElement;
+        const botonTerminarTurno: HTMLButtonElement = document.getElementById('botonTerminarTurno') as HTMLButtonElement;
+
+        botonAtaque.style.backgroundColor = 'gray';
+        botonAtaque.disabled = true;
+        botonHabilidadEspecial.style.backgroundColor = 'gray';
+        botonHabilidadEspecial.disabled = true;
+        botonTerminarTurno.style.backgroundColor = 'gray';
+        botonTerminarTurno.disabled = true;
+    }
+
     dibujarBotones() {
 
         this.animacionesService.animarRetratoPersonaje(this.personajesJugadoresOrdenados[0]);
-        this.animacionesService.mostrarOcultarAura(this.personajesJugadoresOrdenados, this.personajesJugadoresOrdenados[0].identificador, true);
 
         const dimensionesEscenario: DimensionesEscenario = this.obtenerDimensionesContenedorEscenario();
 
-        const botonAtaque: HTMLButtonElement = this.graficosService.dibujarBotonAtaque(this.pantallaPC, dimensionesEscenario, this.personajesJugadoresOrdenados[0]);
-        const botonHabilidadEspecial: HTMLButtonElement = this.graficosService.dibujarBotonHabilidadEspecial(this.pantallaPC, dimensionesEscenario, this.personajesJugadoresOrdenados[0]);
-        const botonTerminarTurno: HTMLButtonElement = this.graficosService.dibujarBotonTerminarTurno(this.pantallaPC, dimensionesEscenario, this.personajesJugadoresOrdenados[0]);
+        const contenedorBotones : HTMLDivElement = this.graficosService.dibujarBotones(this.pantallaPC, this.pantallaHorizontal, dimensionesEscenario);
 
-        this.contenedorEscenario.nativeElement.appendChild(botonAtaque);
-        this.contenedorEscenario.nativeElement.appendChild(botonHabilidadEspecial);
-        this.contenedorEscenario.nativeElement.appendChild(botonTerminarTurno);
+        this.contenedorEscenario.nativeElement.appendChild(contenedorBotones);
+
+        const botonAtaque: HTMLButtonElement = document.getElementById('botonAtaque') as HTMLButtonElement;
+        const botonHabilidadEspecial: HTMLButtonElement = document.getElementById('botonHabilidadEspecial') as HTMLButtonElement;
+        const botonTerminarTurno: HTMLButtonElement = document.getElementById('botonTerminarTurno') as HTMLButtonElement;
+
 
         botonAtaque.addEventListener('click', async () => {
 
            reproducirSonido('seleccionar');    
            
-           botonAtaque.style.opacity = '0';
-           botonHabilidadEspecial.style.opacity = '0';
-           botonTerminarTurno.style.opacity = '0';
+           this.desahabiliatarBotones();
 
            this.seleccionarObjetivosEnemigos(this.personajesOrdenados, this.personajesJugadoresOrdenados[0]);
         });     
@@ -211,10 +276,10 @@ export class BatallaComponent implements AfterViewInit,  OnInit {
 
     async mostrarPanelVictoriaDerrota(victoria: Victoria): Promise<void> {
 
-        //this.reproductorMusicaBatalla.nativeElement.pause();        
-        //this.reproductorMusicaBatalla.nativeElement.currentTime = 0;
-        //this.reproductorMusicaBatalla.nativeElement.src = 'assets/audios/victoria.wav';
-        //this.reproductorMusicaBatalla.nativeElement.play();
+        this.reproductorMusicaBatalla.nativeElement.pause();        
+        this.reproductorMusicaBatalla.nativeElement.currentTime = 0;
+        this.reproductorMusicaBatalla.nativeElement.src = 'assets/audios/victoria.wav';
+        this.reproductorMusicaBatalla.nativeElement.play();
         this.contenedorPrincipal.nativeElement.style.opacity = '0';        
 
         const nombreJugador = localStorage.getItem('nombre');
@@ -237,8 +302,8 @@ export class BatallaComponent implements AfterViewInit,  OnInit {
 
                 if (result.isConfirmed) { 
 
-                    //this.reproductorMusicaBatalla.nativeElement.pause();        
-                    //this.reproductorMusicaBatalla.nativeElement.currentTime = 0;
+                    this.reproductorMusicaBatalla.nativeElement.pause();        
+                    this.reproductorMusicaBatalla.nativeElement.currentTime = 0;
                     this.router.navigate(['']); 
                 }
             });
@@ -264,9 +329,11 @@ export class BatallaComponent implements AfterViewInit,  OnInit {
 
     async ejecutarAcciones(): Promise<void> {
 
-        this.animacionesService.borrarBotones(this.personajesOrdenados);
         this.animacionesService.borrarRetratosPersonajes(this.personajesJugadoresOrdenados);
         this.dibujarRetratosPersonajes();
+        this.desahabiliatarBotones();
+        const x: HTMLDivElement = document.getElementById('interiorRetratoPersonajeTurno') as HTMLDivElement;
+        x.innerHTML = '';
 
         let numeroPersonajesJugadoresActivos: number = 0;
 
@@ -299,8 +366,8 @@ export class BatallaComponent implements AfterViewInit,  OnInit {
 
                     if (this.acciones[i].resultado === 1) {
 
-                        await this.animacionesService.animarAtaque(this.pantallaPC, dimensiones, this.personajesOrdenados, ataque);
-                        await this.animacionesService.animarSaludDefensa(this.personajesOrdenados, ataque);
+                        await this.animacionesService.animarAtaque(dimensiones, this.personajesOrdenados, ataque);
+                        await this.animacionesService.animarDanio(this.personajesOrdenados, ataque);
 
                         if (ataque.personajeDefensor.jugador === true) {
 
@@ -311,8 +378,8 @@ export class BatallaComponent implements AfterViewInit,  OnInit {
                         
                     } else if (this.acciones[i].resultado === 2) {
 
-                        await this.animacionesService.animarAtaque(this.pantallaPC, dimensiones, this.personajesOrdenados, ataque);
-                        await this.animacionesService.animarSaludDefensa(this.personajesOrdenados, ataque);
+                        await this.animacionesService.animarAtaque(dimensiones, this.personajesOrdenados, ataque);
+                        await this.animacionesService.animarDanio(this.personajesOrdenados, ataque);
                         await this.animacionesService.animarInconcienciaPersonaje(ataque.personajeDefensor);
 
                         if (ataque.personajeDefensor.jugador === true) {
@@ -356,11 +423,13 @@ export class BatallaComponent implements AfterViewInit,  OnInit {
             this.animacionesService.borrarRetratosPersonajes(this.personajesJugadoresOrdenados);
 
             this.dibujarRetratosPersonajes();
-            this.dibujarBotones();
+            this.dibujarRetratoPersonajeTurno();
+            this.abiliatarBotones();
 
         } else {
 
-            this.dibujarBotones();
+            this.dibujarRetratoPersonajeTurno();
+            this.abiliatarBotones();
         }
     }
 
@@ -383,7 +452,7 @@ export class BatallaComponent implements AfterViewInit,  OnInit {
         this.animacionesService.borrarRetratosPersonajes(this.personajesJugadoresOrdenados);
 
         this.dibujarRetratosPersonajes();
-        this.dibujarBotones();
+        this.abiliatarBotones();
         this.ejecutarAcciones();
     }
 }
