@@ -9,24 +9,17 @@ export class GraficosService {
 
   constructor() { }
 
-  dibujarPersonaje(pantallaPC: boolean, dimensionesEscenario: DimensionesEscenario, personaje: Personaje): HTMLImageElement {
+  dibujarPersonaje(dimensionesEscenario: DimensionesEscenario, personaje: Personaje): HTMLImageElement {
+
+    const imagenAnterior: HTMLImageElement = document.getElementById(`personaje${personaje.identificador}`) as HTMLImageElement;
+
+    if (imagenAnterior) { imagenAnterior.remove(); }
 
     const alto: number = Math.round((personaje.alto / 528) * dimensionesEscenario.alto);
     const ancho: number = Math.round((personaje.ancho / 528) * dimensionesEscenario.ancho);
     const coordenadaX: number = Math.round((personaje.coordenadaX / 528) * dimensionesEscenario.ancho);
-
-    let coordenadaY: number;
-
-    if (pantallaPC) { 
-
-      coordenadaY = Math.round((personaje.coordenadaY / 528) * dimensionesEscenario.alto);
-
-    } else {
-
-      coordenadaY = Math.round(((personaje.coordenadaY - 74) / 528) * dimensionesEscenario.alto);
-    } 
-    
-    const imagenPersonaje: HTMLImageElement = document.createElement('img');
+    const coordenadaY: number = Math.round((personaje.coordenadaY / 528) * dimensionesEscenario.alto);    
+    const imagen: HTMLImageElement = document.createElement('img');
 
     let opacidad: string = '';
     let trasnformador: string = '';
@@ -35,29 +28,34 @@ export class GraficosService {
 
     if (!personaje.jugador) { trasnformador = 'scaleX(-1)'; }
 
-    imagenPersonaje.id = `personaje${personaje.identificador}`;
-    imagenPersonaje.src = personaje.imagen;
-    imagenPersonaje.style.height = `${alto}px`;
-    imagenPersonaje.style.imageRendering = 'pixelated';
-    imagenPersonaje.style.left = `${coordenadaX}px`;
-    imagenPersonaje.style.opacity = opacidad;
-    imagenPersonaje.style.position = 'absolute';
-    imagenPersonaje.style.top = `${coordenadaY}px`;
-    imagenPersonaje.style.transform = trasnformador;
-    imagenPersonaje.style.transition = 'opacity 0.5s ease';
-    imagenPersonaje.style.width = `${ancho}px`;
-    imagenPersonaje.style.zIndex = '1';
+    imagen.id = `personaje${personaje.identificador}`;
+    imagen.src = personaje.imagen;
+    imagen.style.height = `${alto}px`;
+    imagen.style.imageRendering = 'pixelated';
+    imagen.style.left = `${coordenadaX}px`;
+    imagen.style.opacity = opacidad;
+    imagen.style.position = 'absolute';
+    imagen.style.top = `${coordenadaY}px`;
+    imagen.style.transform = trasnformador;
+    imagen.style.transition = 'opacity 0.5s ease';
+    imagen.style.width = `${ancho}px`;
+    imagen.style.zIndex = '1';
 
-    return imagenPersonaje;
+    return imagen;
   }
 
-  dibujarAura(pantallaPC: boolean, dimensionesEscenario: DimensionesEscenario, personaje: Personaje): HTMLImageElement {
+  dibujarAura(dimensionesEscenario: DimensionesEscenario, personaje: Personaje): HTMLImageElement {
+
+    const imagenAnterior: HTMLImageElement = document.getElementById(`aura${personaje.identificador}`) as HTMLImageElement;
+
+    if (imagenAnterior) { imagenAnterior.remove(); }
 
     const alto: number = Math.round((personaje.alto / 528) * dimensionesEscenario.alto);
-    const ancho: number = Math.round((personaje.ancho / 528) * dimensionesEscenario.ancho);
+    const ancho: number = Math.round((personaje.ancho / 528) * dimensionesEscenario.ancho);    
+    const coordenadaY: number = Math.round(((personaje.coordenadaY + 8) / 528) * dimensionesEscenario.alto);
+    const imagen: HTMLImageElement = document.createElement('img');
 
     let coordenadaX: number;
-    let coordenadaY: number;
 
     if (personaje.jugador) {
 
@@ -66,127 +64,276 @@ export class GraficosService {
     } else {
 
       coordenadaX = Math.round(((personaje.coordenadaX + 4) / 528) * dimensionesEscenario.ancho);
-    }
+    }    
 
-    if (pantallaPC) { 
-      
-      coordenadaY =  Math.round(((personaje.coordenadaY + 8) / 528) * dimensionesEscenario.alto);
+    imagen.id = `aura${personaje.identificador}`;
+    imagen.src = 'assets/images/auras/amarillo/1.png';
+    imagen.style.height = `${alto}px`;
+    imagen.style.imageRendering = 'pixelated';
+    imagen.style.left = `${coordenadaX}px`;
+    imagen.style.opacity = '0';
+    imagen.style.pointerEvents = 'none';
+    imagen.style.position = 'absolute';
+    imagen.style.top = `${coordenadaY}px`;
+    imagen.style.transition = 'opacity 0.5s ease';
+    imagen.style.width = `${ancho}px`;
+    imagen.style.zIndex = '0';
 
-    } else {
-
-      coordenadaY = Math.round(((personaje.coordenadaY - 66) / 528) * dimensionesEscenario.alto);
-    } 
-
-    const imagenAura: HTMLImageElement = document.createElement('img');
-
-    imagenAura.id = `aura${personaje.identificador}`;
-    imagenAura.src = 'assets/images/auras/amarillo/1.png';
-    imagenAura.style.height = `${alto}px`;
-    imagenAura.style.imageRendering = 'pixelated';
-    imagenAura.style.left = `${coordenadaX}px`;
-    imagenAura.style.opacity = '0';
-    imagenAura.style.pointerEvents = 'none';
-    imagenAura.style.position = 'absolute';
-    imagenAura.style.top = `${coordenadaY}px`;
-    imagenAura.style.transition = 'opacity 0.5s ease';
-    imagenAura.style.width = `${ancho}px`;
-    imagenAura.style.zIndex = '0';
-
-    return imagenAura;
+    return imagen;
   }
 
-  dibujarContenedorAnimacion(pantallaPC: boolean, dimensionesEscenario: DimensionesEscenario, personaje: Personaje): HTMLDivElement {
+  dibujarDanio(dimensionesEscenario: DimensionesEscenario, personaje: Personaje): HTMLDivElement {
 
+    const contenedorAnterior: HTMLDivElement = document.getElementById(`danio${personaje.identificador}`) as HTMLDivElement;
+
+    if (contenedorAnterior) { contenedorAnterior.remove(); }
+
+    const alto: number = Math.round((50 / 528) * dimensionesEscenario.alto);
+    const ancho: number = Math.round((personaje.ancho / 528) * dimensionesEscenario.ancho);
     const coordenadaX: number = Math.round((personaje.coordenadaX / 528) * dimensionesEscenario.ancho);
+    const coordenadaY: number = Math.round(((personaje.coordenadaY - 32) / 528) * dimensionesEscenario.alto);
+    const contenedor: HTMLDivElement = document.createElement('div');
+
+    contenedor.id = `danio${personaje.identificador}`;
+    contenedor.style.alignItems = 'center';
+    contenedor.style.display = 'flex';
+    contenedor.style.fontSize = '40px';
+    contenedor.style.fontWeight = 'bold';
+    contenedor.style.height = `${alto}px`;
+    contenedor.style.justifyContent = 'center';
+    contenedor.style.left = `${coordenadaX}px`;
+    contenedor.style.lineHeight = '40px';
+    contenedor.style.opacity = '1';
+    contenedor.style.pointerEvents = 'none';
+    contenedor.style.position = 'absolute';
+    contenedor.style.textAlign = 'left';
+    contenedor.style.top = `${coordenadaY}px`;
+    contenedor.style.transition = 'opacity 0.5s ease';
+    contenedor.style.width = `${ancho}px`;
+    contenedor.style.zIndex = '2';
+    //contenedor.style.border = '1px solid red';    
+
+    return contenedor;
+  } 
+
+  dibujarRetratoPersonaje(pantallaPC: boolean, pantallaHorizontal: boolean, dimensionesEscenario: DimensionesEscenario, personaje: Personaje): HTMLDivElement {
+
+    const anteriorRetratoPersonaje: HTMLDivElement = document.getElementById(`retratoPersonaje${personaje.identificador}`) as HTMLDivElement;
+
+    if (anteriorRetratoPersonaje) { anteriorRetratoPersonaje.remove(); }
+
+    const contenedorMarco: HTMLDivElement = document.createElement('div');
+    const contenedorParrafos: HTMLDivElement = document.createElement('div');
+    const imagen: HTMLImageElement = document.createElement('img');
+    const fragmentoParrafoSalud: HTMLSpanElement = document.createElement('span');
 
     let alto: number;
     let ancho: number;
-    let coordenadaY: number;
-
+    let coordenadaX: number;
+    let tamanioFuente: number;
+    
     if (pantallaPC) {
 
-      alto = Math.round((personaje.alto / 528) * dimensionesEscenario.alto);
-      ancho = Math.round((personaje.alto / 528) * dimensionesEscenario.ancho);
-      coordenadaY = Math.round(((personaje.coordenadaY - 32) / 528) * dimensionesEscenario.alto);
+      alto = Math.round((90 / 528) * dimensionesEscenario.alto);
+      ancho = Math.round((dimensionesEscenario.ancho - 10) / 8);  
+      
+      if (pantallaHorizontal === false) {
+
+        tamanioFuente = 20;
+
+      } else {
+
+        tamanioFuente = 16;
+      }
 
     } else {
 
-      alto = Math.round((30 / 528) * dimensionesEscenario.alto);
-      ancho = Math.round((80 / 528) * dimensionesEscenario.ancho);
-      coordenadaY = Math.round((((personaje.coordenadaY - 74) - 16) / 528) * dimensionesEscenario.alto);
+      alto = Math.round((90 / 528) * dimensionesEscenario.alto);
+      ancho = Math.round((dimensionesEscenario.ancho - 10) / 4);
+      tamanioFuente = 16;
     }
-
-    const contenedorAnimacion: HTMLDivElement = document.createElement('div');
-
-    contenedorAnimacion.id = `animacion${personaje.identificador}`;
-    contenedorAnimacion.style.fontSize = '40px';
-    contenedorAnimacion.style.fontWeight = 'bold';
-    contenedorAnimacion.style.height = `${alto}px`;
-    contenedorAnimacion.style.left = `${coordenadaX}px`;
-    contenedorAnimacion.style.lineHeight = '40px';
-    contenedorAnimacion.style.opacity = '1';
-    contenedorAnimacion.style.pointerEvents = 'none';
-    contenedorAnimacion.style.position = 'absolute';
-    
-
-    contenedorAnimacion.style.display = 'flex';
-    contenedorAnimacion.style.alignItems = 'center';
-    contenedorAnimacion.style.justifyContent = 'center';
-
-    contenedorAnimacion.style.textAlign = 'left';
-    contenedorAnimacion.style.top = `${coordenadaY}px`;
-    contenedorAnimacion.style.transition = 'opacity 0.5s ease';
-    contenedorAnimacion.style.width = `${ancho}px`;
-    contenedorAnimacion.style.zIndex = '2';
-    //contenedorAnimacion.style.border = '1px solid red';    
-
-    return contenedorAnimacion;
-  } 
-
-  dibujarRetratoPersonaje(dimensionesEscenario: DimensionesEscenario, personaje: Personaje): HTMLDivElement {
-   
-    const alto = Math.round((90 / 528) * dimensionesEscenario.alto);
-    const ancho: number = Math.round(((dimensionesEscenario.ancho / 2) - 10) / 4);    
-    let coordenadaX: number;
 
     if (personaje.identificador === 1) {
 
-      coordenadaX = (2 + (ancho * (personaje.identificador - 1)));
+      coordenadaX = 2;
 
     } else {
 
-      coordenadaX = ((personaje.identificador * 2) + (ancho * (personaje.identificador - 1)));
+      coordenadaX = (ancho * (personaje.identificador - 1) + (2 + (2  * (personaje.identificador - 1))));
     }
-
-    const marcoContenedorParrafos: HTMLDivElement = document.createElement('div');
-    const contenedorParrafos: HTMLDivElement = document.createElement('div');
-    const imagen: HTMLImageElement = document.createElement('img');
-    const iconoIniciativa: HTMLImageElement = document.createElement('img');
-    const iconoDefensa: HTMLImageElement = document.createElement('img');
-    const iconoSalud: HTMLImageElement = document.createElement('img');
-    const rutaIconoIniciativa: string = `assets/images/icons/Iniciativa.ico`;
-    const rutaIconoDefensa: string = `assets/images/icons/Escudo.ico`;
-    const rutaIconoSalud: string = `assets/images/icons/Corazon.ico`;
-    const fragmentoParrafoNombre: HTMLSpanElement = document.createElement('span');
-    const fragmentoParrafoIniciativa: HTMLSpanElement = document.createElement('span');
-    const fragmentoParrafoDefensa: HTMLSpanElement = document.createElement('span');
-    const fragmentoParrafoSalud: HTMLSpanElement = document.createElement('span');
 
     let opacidad: string = '0';
 
     if (personaje.saludActual > 0) { opacidad = '0.5' } else { opacidad = '0.1' }
 
+    contenedorMarco.id = `retratoPersonaje${personaje.identificador}`;
+    contenedorMarco.style.backgroundColor = 'white';
+    contenedorMarco.style.border = '2px solid white';    
+    contenedorMarco.style.borderRadius = '4px';
+    contenedorMarco.style.height = `${alto}px`;
+    contenedorMarco.style.left = `${coordenadaX}px`; 
+    contenedorMarco.style.opacity = opacidad;
+    contenedorMarco.style.position = 'absolute';
+    contenedorMarco.style.top = '2px';
+    contenedorMarco.style.transition = 'opacity 0.5s ease';
+    contenedorMarco.style.width = `${ancho}px`;
+    contenedorMarco.style.zIndex = '0';
+
+    contenedorParrafos.style.color = 'white';
+    contenedorParrafos.style.backgroundColor = 'blue';
+    contenedorParrafos.style.borderRadius = '4px';
+    contenedorParrafos.style.fontSize = `${tamanioFuente}px`;
+    contenedorParrafos.style.height = '100%';
+    contenedorParrafos.style.lineHeight = `${tamanioFuente}px`;
+    contenedorParrafos.style.transition = 'opacity 0.5s ease';
+    contenedorParrafos.style.width = '100%';
+    contenedorParrafos.style.border = '1px solid gray';
+    contenedorParrafos.textContent = personaje.nombre;
+
+    contenedorParrafos.style.alignItems = 'center';
+    contenedorParrafos.style.display = 'flex';
+    contenedorParrafos.style.flexDirection = 'column';
+    contenedorParrafos.style.justifyContent = 'center';
+    
+    imagen.src = `assets/images/personajes/retratos/${personaje.nombre}.png`;
+    imagen.style.imageRendering = 'pixelated';
+    imagen.style.height = '50%';
+    imagen.style.width = '100%';
+
+    fragmentoParrafoSalud.textContent = `Salud: ${personaje.saludActual}/${personaje.salud}`;
+    fragmentoParrafoSalud.style.textAlign = 'left';
+
+    contenedorMarco.appendChild(contenedorParrafos);
+    contenedorParrafos.appendChild(imagen);
+    contenedorParrafos.appendChild(fragmentoParrafoSalud);
+
+    return contenedorMarco;
+  }
+
+  dibujarRetratoPersonajeTurno(pantallaPC: boolean, pantallaHorizontal: boolean, dimensionesEscenario: DimensionesEscenario, personaje: Personaje): HTMLDivElement {
+
+    const anteriorRetratoPersonajeTurno: HTMLDivElement = document.getElementById('retratoPersonajeTurno') as HTMLDivElement;
+
+    if (anteriorRetratoPersonajeTurno) { anteriorRetratoPersonajeTurno.remove(); }
+
+    const marcoContenedorParrafos: HTMLDivElement = document.createElement('div');
+    const contenedorParrafos: HTMLDivElement = document.createElement('div');
+    const imagen: HTMLImageElement = document.createElement('img');
+    const fragmentoParrafoNombre: HTMLSpanElement = document.createElement('span');
+
+    let alto: number;
+    let ancho: number; 
+    let tamanioFuente: number;
+    let coordenadaX: number;
+    let coordenadaY: number;
+
+    if (pantallaPC) {
+
+      alto = Math.round((126 / 528) * dimensionesEscenario.alto);
+      ancho = Math.round((dimensionesEscenario.ancho / 5) - 8);
+      coordenadaX = 2;
+      coordenadaY = (dimensionesEscenario.alto - alto - 2);
+
+      if (pantallaHorizontal === false) {
+
+        tamanioFuente = 20;
+
+      } else {
+
+        tamanioFuente = 14;
+      }
+
+    } else {
+
+      alto = Math.round((120 / 528) * dimensionesEscenario.alto);
+      ancho = Math.round((dimensionesEscenario.ancho / 3) - 4);
+      tamanioFuente = 14;
+      coordenadaX = 2;
+      coordenadaY = (dimensionesEscenario.alto - alto - 2);
+    }
+    
     marcoContenedorParrafos.style.height = `${alto}px`;
     marcoContenedorParrafos.style.width = `${ancho}px`;
-    marcoContenedorParrafos.style.top = '2px';
+    marcoContenedorParrafos.style.left = `${coordenadaX}px`;    
+    marcoContenedorParrafos.style.top = `${coordenadaY}px`;
 
-    marcoContenedorParrafos.style.left = `${coordenadaX}px`;
-
-    marcoContenedorParrafos.id = `retratoPersonaje${personaje.identificador}`;
+    marcoContenedorParrafos.id = 'retratoPersonajeTurno';
     marcoContenedorParrafos.style.backgroundColor = 'white';
     marcoContenedorParrafos.style.borderRadius = '4px';
     marcoContenedorParrafos.style.border = '2px solid white';
-    marcoContenedorParrafos.style.opacity = opacidad;
+    marcoContenedorParrafos.style.opacity = '1';
+    marcoContenedorParrafos.style.position = 'absolute';
+    marcoContenedorParrafos.style.transition = 'opacity 0.5s ease';
+    marcoContenedorParrafos.style.zIndex = '0';
+
+    contenedorParrafos.id = 'interiorRetratoPersonajeTurno';
+    contenedorParrafos.style.color = 'white';
+    contenedorParrafos.style.backgroundColor = 'blue';
+    contenedorParrafos.style.borderRadius = '4px';
+    contenedorParrafos.style.fontSize = `${tamanioFuente}px`;
+    contenedorParrafos.style.height = '100%';
+    contenedorParrafos.style.lineHeight = `${tamanioFuente}px`;
+    contenedorParrafos.style.transition = 'opacity 0.5s ease';
+    contenedorParrafos.style.width = '100%';
+    contenedorParrafos.style.border = '1px solid gray';
+
+    marcoContenedorParrafos.appendChild(contenedorParrafos);
+
+    imagen.src = `assets/images/personajes/retratos/${personaje.nombre}.png`;
+    imagen.style.height = '100%';
+    imagen.style.top = '0px';
+    imagen.style.left = '0px';
+    imagen.style.position = 'absolute';
+    imagen.style.imageRendering = 'pixelated';
+    imagen.style.width = '50%';
+
+    fragmentoParrafoNombre.id = 'nombrePersonajeturno';
+    fragmentoParrafoNombre.innerHTML = `Turno de: ${personaje.nombre}<br><br>¿que debería hacer ${personaje.nombre}?`;
+    fragmentoParrafoNombre.style.top = '0px';
+    fragmentoParrafoNombre.style.left = 'calc(0px + 50%)';
+    fragmentoParrafoNombre.style.position = 'absolute';
+
+    contenedorParrafos.appendChild(imagen);
+    contenedorParrafos.appendChild(fragmentoParrafoNombre);
+
+    return marcoContenedorParrafos;
+  }
+  
+  dibujarTextoBatalla(pantallaPC: boolean, dimensionesEscenario: DimensionesEscenario): HTMLDivElement {
+     
+    const marcoContenedorParrafos: HTMLDivElement = document.createElement('div');
+    const contenedorParrafos: HTMLDivElement = document.createElement('div');
+    const fragmentoParrafo: HTMLSpanElement = document.createElement('span');
+
+    let alto: number;
+    let ancho: number; 
+    let coordenadaX: number;
+    let coordenadaY: number;
+
+    if (pantallaPC) {
+
+      alto = Math.round((50 / 528) * dimensionesEscenario.alto);
+      ancho = Math.round(dimensionesEscenario.ancho - 4); 
+      coordenadaX = 2;
+      coordenadaY = (dimensionesEscenario.alto - alto - 2);
+
+    } else {
+
+      alto = Math.round((120 / 528) * dimensionesEscenario.alto);
+      ancho = Math.round((dimensionesEscenario.ancho / 2) - 4);
+      coordenadaX = 2;
+      coordenadaY = (dimensionesEscenario.alto - alto - 2);
+    }
+
+    marcoContenedorParrafos.style.height = `${alto}px`;
+    marcoContenedorParrafos.style.width = `${ancho}px`;
+    marcoContenedorParrafos.style.top = `${coordenadaY}px`;   
+    marcoContenedorParrafos.style.left = `${coordenadaX}px`;
+
+    marcoContenedorParrafos.style.backgroundColor = 'white';
+    marcoContenedorParrafos.style.borderRadius = '4px';
+    marcoContenedorParrafos.style.border = '2px solid white';
+    marcoContenedorParrafos.style.opacity = '1';
     marcoContenedorParrafos.style.position = 'absolute';
     marcoContenedorParrafos.style.transition = 'opacity 0.5s ease';
     marcoContenedorParrafos.style.zIndex = '0';
@@ -194,274 +341,165 @@ export class GraficosService {
     contenedorParrafos.style.color = 'white';
     contenedorParrafos.style.backgroundColor = 'blue';
     contenedorParrafos.style.borderRadius = '4px';
-    contenedorParrafos.style.fontSize = '1rem';
+    contenedorParrafos.style.fontSize = '20px';
     contenedorParrafos.style.height = '100%';
-    contenedorParrafos.style.lineHeight = '1rem';
+    contenedorParrafos.style.lineHeight = '20px';
     contenedorParrafos.style.transition = 'opacity 0.5s ease';
     contenedorParrafos.style.width = '100%';
     contenedorParrafos.style.border = '1px solid gray';
 
     marcoContenedorParrafos.appendChild(contenedorParrafos);
 
-    imagen.src = `assets/images/personajes/retratos/${personaje.nombre}.png`;;
-    imagen.style.height = '100%';
-    imagen.style.top = '0px';
-    imagen.style.left = '0px';
-    imagen.style.position = 'absolute';
-    imagen.style.imageRendering = 'pixelated';
-    imagen.style.width = '50%';
-    //imagen.style.border = '1px solid gray';
-
-    iconoIniciativa.style.height = '20px';
-    iconoIniciativa.style.filter = 'brightness(0) saturate(100%) invert(85%) sepia(100%) saturate(5500%) hue-rotate(10deg) brightness(140%) contrast(120%)';
-    iconoIniciativa.style.width = '20px';
-    iconoIniciativa.src = rutaIconoIniciativa;
-    iconoIniciativa.style.top = '22px';
-    iconoIniciativa.style.left = 'calc(0px + 50%);'
-    iconoIniciativa.style.position = 'absolute';
-    //iconoIniciativa.style.border = '1px solid green';
-
-    iconoDefensa.style.height = '20px';
-    iconoDefensa.style.filter = 'brightness(0) saturate(100%) invert(29%) sepia(97%) saturate(2736%) hue-rotate(183deg) brightness(100%) contrast(95%)';
-
-    iconoDefensa.style.width = '20px';
-    iconoDefensa.src = rutaIconoDefensa;
-    iconoDefensa.style.top = '42px';
-    iconoDefensa.style.left = 'calc(0px + 50%)'
-    iconoDefensa.style.position = 'absolute';
-    //iconoDefensa.style.border = '1px solid green';
-
-    iconoSalud.style.height = '20px';
-    iconoSalud.style.filter = 'brightness(0) saturate(100%) invert(11%) sepia(97%) saturate(7470%) hue-rotate(358deg) brightness(99%) contrast(113%)';
-    iconoSalud.style.width = '20px';
-    iconoSalud.src = rutaIconoSalud;
-    iconoSalud.style.top = '62px';
-    iconoSalud.style.left = 'calc(0px + 50%)';
-    iconoSalud.style.position = 'absolute';
-    //iconoSalud.style.border = '1px solid white';
-
-    fragmentoParrafoNombre.id = 'nombrePersonajeturno';
-    fragmentoParrafoNombre.textContent = `${personaje.nombre}`;
-    fragmentoParrafoNombre.style.top = '0px';
-    fragmentoParrafoNombre.style.left = 'calc(0px + 50%)';
-    fragmentoParrafoNombre.style.position = 'absolute';
-    //fragmentoParrafoNombre.style.border = '1px solid green';     
-
-    fragmentoParrafoIniciativa.id = 'iniciativaPersonajeTurno';
-    fragmentoParrafoIniciativa.textContent = `${personaje.iniciativaActual}/${personaje.iniciativa}`;
-    fragmentoParrafoIniciativa.style.top = '22px';
-    fragmentoParrafoIniciativa.style.left = 'calc(0px + 70%)';
-    fragmentoParrafoIniciativa.style.position = 'absolute';
-    //fragmentoParrafoIniciativa.style.border = '1px solid blue';
-
-    fragmentoParrafoDefensa.id = 'defensaPersonajeTurno';
-    fragmentoParrafoDefensa.textContent = `${personaje.defensaActual}/${personaje.defensa}`;
-    fragmentoParrafoDefensa.style.top = '42px';
-    fragmentoParrafoDefensa.style.left = 'calc(0px + 70%)';
-    fragmentoParrafoDefensa.style.position = 'absolute';
-    //fragmentoParrafoDefensa.style.border = '1px solid purple';
-
-    fragmentoParrafoSalud.appendChild(iconoSalud);
-    fragmentoParrafoSalud.id = 'saludPersonajeTurno';
-    fragmentoParrafoSalud.textContent = `${personaje.saludActual}/${personaje.salud}`;
-    fragmentoParrafoSalud.style.top = '62px';
-    fragmentoParrafoSalud.style.left = 'calc(0px + 70%)';
-    fragmentoParrafoSalud.style.position = 'absolute';
-    //fragmentoParrafoSalud.style.border = '1px solid white';
-
-    contenedorParrafos.appendChild(iconoIniciativa);
-    contenedorParrafos.appendChild(iconoDefensa);
-    contenedorParrafos.appendChild(iconoSalud);
-    contenedorParrafos.appendChild(imagen);
-    contenedorParrafos.appendChild(fragmentoParrafoNombre);
-    contenedorParrafos.appendChild(fragmentoParrafoIniciativa);
-    contenedorParrafos.appendChild(fragmentoParrafoDefensa);
-    contenedorParrafos.appendChild(fragmentoParrafoSalud);
+    fragmentoParrafo.id = 'textoBatalla';
+    fragmentoParrafo.style.top = '2px';
+    fragmentoParrafo.style.left = '2px';
+    fragmentoParrafo.style.position = 'absolute';
+    
+    contenedorParrafos.appendChild(fragmentoParrafo);
 
     return marcoContenedorParrafos;
   }
 
-  dibujarBotonAtaque(pantallaPC: boolean, dimensionesEscenario: DimensionesEscenario, personaje: Personaje): HTMLButtonElement {
-
-    let alto: number;
-    let ancho: number;
-    let coordenadaX: number;
-    let coordenadaY: number;    
-    let altoIcono: number;
-    let anchoIcono: number;
-
-    if (pantallaPC) {
-
-      alto = 50;
-      ancho = 50;
-      coordenadaX = (Math.round((personaje.coordenadaX / 528) * dimensionesEscenario.ancho) + 104);
-      coordenadaY = (Math.round(((personaje.coordenadaY - 60) / 528) * dimensionesEscenario.alto));  
-      altoIcono = 40;
-      anchoIcono = 40;    
-
-    } else {
-
-      alto = 40;
-      ancho = 40;
-      coordenadaX = (Math.round((personaje.coordenadaX / 528) * dimensionesEscenario.ancho) + 44);
-      coordenadaY = (Math.round(((personaje.coordenadaY - 114) / 528) * dimensionesEscenario.alto));     
-      altoIcono = 30;
-      anchoIcono = 30;  
-    }
+  dibujarBotonAtaque(): HTMLButtonElement {
     
     const boton: HTMLButtonElement = document.createElement('button');
-    const icono: HTMLImageElement = document.createElement('img');
-
-    icono.src = `assets/images/icons/Espada.ico`;
-    icono.style.filter = 'invert(1)';
-    icono.style.height = `${altoIcono}px`;
-    icono.style.width = `${anchoIcono}px`;
-
-    boton.appendChild(icono);
 
     boton.id = 'botonAtaque';
-
-    boton.style.display = 'flex';
-    boton.style.alignItems = 'center';
-    boton.style.justifyContent = 'center';
-
     boton.style.backgroundColor = 'red';
     boton.style.borderColor = 'white';
     boton.style.borderRadius = '4px';
     boton.style.color = 'white';
-    boton.style.height = `${alto}px`;
-    boton.style.left = `${coordenadaX}px`;
+    boton.style.height = '24%';
+    boton.style.margin = 'auto';
     boton.style.opacity = '1';
-    boton.style.position = 'absolute';
-    boton.style.top = `${coordenadaY}px`;
-    boton.style.transition = 'opacity 0.5s ease';
-    boton.style.width = `${ancho}px`;
-    boton.style.zIndex = '2';
+    boton.style.transition = 'backgroundColor 0.5s ease';
+    boton.style.width = '98%';
+    boton.style.zIndex = '1';
+    boton.textContent = 'Atacar';
 
     return boton;
   }
 
-  dibujarBotonHabilidadEspecial(pantallaPC: boolean, dimensionesEscenario: DimensionesEscenario, personaje: Personaje): HTMLButtonElement {
-
-    let alto: number;
-    let ancho: number;
-    let coordenadaX: number;
-    let coordenadaY: number;
-    let altoIcono: number;
-    let anchoIcono: number;
-
-    if (pantallaPC) {
-
-      alto = 50;
-      ancho = 50;
-      coordenadaX = (Math.round((personaje.coordenadaX / 528) * dimensionesEscenario.ancho) + 52);
-      coordenadaY = (Math.round(((personaje.coordenadaY - 60) / 528) * dimensionesEscenario.alto));
-      altoIcono = 40;
-      anchoIcono = 40;            
-
-    } else {
-
-      alto = 40;
-      ancho = 40;
-      coordenadaX = (Math.round((personaje.coordenadaX / 528) * dimensionesEscenario.ancho) + 2);
-      coordenadaY = (Math.round(((personaje.coordenadaY - 114) / 528) * dimensionesEscenario.alto));   
-      altoIcono = 30;
-      anchoIcono = 30;    
-    }
+  dibujarBotonHabilidadEspecial(): HTMLButtonElement {
     
     const boton: HTMLButtonElement = document.createElement('button');
-    const icono: HTMLImageElement = document.createElement('img');
-
-    icono.src = `assets/images/icons/Critico.ico`;
-    icono.style.filter = 'invert(1)';
-    icono.style.height = `${altoIcono}px`;
-    icono.style.width = `${anchoIcono}px`;
-
-    boton.appendChild(icono);
 
     boton.id = 'botonHabilidadEspecial';
-
-    boton.style.display = 'flex';
-    boton.style.alignItems = 'center';
-    boton.style.justifyContent = 'center';
-    boton.style.backgroundColor = 'gray';
-
-    //boton.style.backgroundColor = 'green';
+    boton.style.backgroundColor = 'green';
     boton.style.borderColor = 'white';
     boton.style.borderRadius = '4px';
     boton.style.color = 'white';
-    boton.style.height = `${alto}px`;
-    boton.style.left = `${coordenadaX}px`;
+    boton.style.height = '24%';
+    boton.style.margin = 'auto';
     boton.style.opacity = '1';
-    boton.style.position = 'absolute';
-    boton.style.top = `${coordenadaY}px`;
-    boton.style.transition = 'opacity 0.5s ease';
-    boton.style.width = `${ancho}px`;
-    boton.style.zIndex = '2';
+    boton.style.transition = 'backgroundColor 0.5s ease';
+    boton.style.width = '98%';
+    boton.style.zIndex = '1';
+    boton.textContent = 'Habilidad Especial';
 
     return boton;
   }
 
-  dibujarBotonTerminarTurno(pantallaPC: boolean, dimensionesEscenario: DimensionesEscenario, personaje: Personaje): HTMLButtonElement {
+  dibujarBotonTermianrTurno(): HTMLButtonElement {
+    
+    const boton: HTMLButtonElement = document.createElement('button');
+
+    boton.id = 'botonTerminarTurno';
+    boton.style.backgroundColor = '#FF6A00';
+    boton.style.borderColor = 'white';
+    boton.style.borderRadius = '4px';
+    boton.style.color = 'white';
+    boton.style.height = '24%';
+    boton.style.margin = 'auto';
+    boton.style.opacity = '1';
+    boton.style.transition = 'opacity 0.5s ease';
+    boton.style.width = '98%';
+    boton.style.zIndex = '1';
+    boton.textContent = 'Terminar Turno';
+
+    return boton;
+  }
+
+  dibujarBotones(pantallaPC: boolean, pantallaHorizontal: boolean, dimensionesEscenario: DimensionesEscenario): HTMLDivElement {
+
+    const anteriorcontenedor: HTMLDivElement = document.getElementById('contenedorBotones') as HTMLDivElement;
+
+    if (anteriorcontenedor) { anteriorcontenedor.remove(); }
+
+    const contenedorMarco: HTMLDivElement = document.createElement('div');
+    const contenedorBotones: HTMLDivElement = document.createElement('div');
 
     let alto: number;
-    let ancho: number;
+    let ancho: number; 
+    let tamanioFuente: number;
     let coordenadaX: number;
-    let coordenadaY: number;    
-    let altoIcono: number;
-    let anchoIcono: number;
+    let coordenadaY: number;
 
     if (pantallaPC) {
 
-      alto = 50;
-      ancho = 50;
-      coordenadaX = Math.round((personaje.coordenadaX / 528) * dimensionesEscenario.ancho);
-      coordenadaY = (Math.round(((personaje.coordenadaY - 60) / 528) * dimensionesEscenario.alto));  
-      altoIcono = 40;
-      anchoIcono = 40;    
+      alto = Math.round((126 / 528) * dimensionesEscenario.alto);
+      ancho = Math.round((dimensionesEscenario.ancho / 5) - 8); 
+      coordenadaX = (ancho + 4); 
+      coordenadaY = (dimensionesEscenario.alto - alto - 2);
+
+      if (pantallaHorizontal === false) {
+
+        tamanioFuente = 20;
+
+      } else {
+
+        tamanioFuente = 14;
+      }
 
     } else {
 
-      alto = 40;
-      ancho = 40;
-      coordenadaX = (Math.round((personaje.coordenadaX / 528) * dimensionesEscenario.ancho) - 40);
-      coordenadaY = (Math.round(((personaje.coordenadaY - 114) / 528) * dimensionesEscenario.alto));  
-      altoIcono = 30;
-      anchoIcono = 30;     
+      alto = Math.round((120 / 528) * dimensionesEscenario.alto);
+      ancho = Math.round((dimensionesEscenario.ancho / 3) - 4);
+      tamanioFuente = 18;
+      coordenadaX = (ancho + 4);
+      coordenadaY = (dimensionesEscenario.alto - alto - 2);
     }
+
+    contenedorMarco.id = 'contenedorBotones';    
+    contenedorMarco.style.backgroundColor = 'white';
+    contenedorMarco.style.border = '2px solid white';
+    contenedorMarco.style.borderRadius = '4px';
+    contenedorMarco.style.height = `${alto}px`;
+    contenedorMarco.style.left = `${coordenadaX}px`; 
+    contenedorMarco.style.opacity = '1';
+    contenedorMarco.style.position = 'absolute';       
+    contenedorMarco.style.top = `${coordenadaY}px`;
+    contenedorMarco.style.transition = 'opacity 0.5s ease';    
+    contenedorMarco.style.width = `${ancho}px`;
+    contenedorMarco.style.zIndex = '0';
     
-    const boton: HTMLButtonElement = document.createElement('button');
-    const icono: HTMLImageElement = document.createElement('img');
+    contenedorBotones.style.alignItems = 'center';
+    contenedorBotones.style.backgroundColor = 'blue';    
+    contenedorBotones.style.border = '1px solid gray';
+    contenedorBotones.style.borderRadius = '4px';
+    contenedorBotones.style.color = 'white';
+    contenedorBotones.style.display = 'flex';
+    contenedorBotones.style.flexDirection = 'column';
+    contenedorBotones.style.fontSize = `${tamanioFuente}px`;
+    contenedorBotones.style.height = '100%';
+    contenedorBotones.style.justifyContent = 'center';
+    contenedorBotones.style.lineHeight = `${tamanioFuente}px`;
+    contenedorBotones.style.padding = '2px';
+    contenedorBotones.style.transition = 'opacity 0.5s ease';
+    contenedorBotones.style.width = '100%';
 
-    icono.src = `assets/images/icons/TerminarTurno.ico`;
-    icono.style.filter = 'invert(1)';
-    icono.style.height = `${altoIcono}px`;
-    icono.style.width = `${anchoIcono}px`;
+    contenedorMarco.appendChild(contenedorBotones);
 
-    boton.appendChild(icono);
+    contenedorBotones.textContent = 'Opciones';
 
-    boton.id = 'botonTerminarTurno';
+    const botonAtaque: HTMLButtonElement = this.dibujarBotonAtaque();
+    const botonHabilidadEspecial: HTMLButtonElement = this.dibujarBotonHabilidadEspecial();
+    const botonTerminarTurno: HTMLButtonElement = this.dibujarBotonTermianrTurno();
 
-    boton.style.display = 'flex';
-    boton.style.alignItems = 'center';
-    boton.style.justifyContent = 'center';
-    boton.style.backgroundColor = 'gray';
-
-    //boton.style.backgroundColor = 'orange';
-    boton.style.borderColor = 'white';
-    boton.style.borderRadius = '4px';
-    boton.style.color = 'white';
-    boton.style.height = `${alto}px`;
-    boton.style.left = `${coordenadaX}px`;
-    boton.style.opacity = '1';
-    boton.style.position = 'absolute';
-    boton.style.top = `${coordenadaY}px`;
-    boton.style.transition = 'opacity 0.5s ease';
-    boton.style.width = `${ancho}px`;
-    boton.style.zIndex = '2';
-
-    return boton;
+    contenedorBotones.appendChild(botonAtaque);
+    contenedorBotones.appendChild(botonHabilidadEspecial);
+    contenedorBotones.appendChild(botonTerminarTurno);
+    
+    return contenedorMarco;
   }
-
-  borrarContenedorAnimacion(): void {}
 }

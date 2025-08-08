@@ -12,22 +12,13 @@ export class AnimacionesService {
 
   animarPersonajes: boolean = true;
   animarAuras: boolean  = true;
+  animarPersonajePosturaObjetivo: boolean = true;
 
   listaIdentificadoresAnimacionesPersonajes: number[] = [];
   listaIdentificadoresAnimacionesAuras: number[] = [];
   identificadorAnimacionReatroPersonaje: number = 0;
 
   constructor() { }
-
-  redibujarEscenario(pantallaPC: boolean): void {
-
-    if (pantallaPC === false) {
-
-      const imagenEscenario: HTMLImageElement = document.getElementById('escenario') as HTMLImageElement;
-
-      imagenEscenario.src = 'assets/images/escenarioB.png';
-    }
-  }
 
   async animarPersonajesPosturaInicial(personajes: Personaje[]): Promise<void> {
 
@@ -111,46 +102,26 @@ export class AnimacionesService {
     }
   }
 
-  async animarAtaque(pantallaPC: boolean, dimensiones: DimensionesEscenario, personajes: Personaje[], ataque: Ataque): Promise<void> {
+  async animarAtaque(dimensiones: DimensionesEscenario, personajes: Personaje[], ataque: Ataque): Promise<void> {
 
     const personajeAtacante = personajes.find(personaje => personaje.identificador === ataque.personajeAtacante.identificador)!;
     const personajeDefensor = personajes.find(personaje => personaje.identificador === ataque.personajeDefensor.identificador)!;
     const atacanteCoordenadaX: number = Math.round((personajeAtacante.coordenadaX / 528) * dimensiones.ancho);    
-    
-    let atacanteCoordenadaY: number;
+    const atacanteCoordenadaY: number = Math.round((personajeAtacante.coordenadaY / 528) * dimensiones.alto);
+
     let coordenadaX: number;
     let coordenadaY: number;
 
-    if (pantallaPC) { 
+    if (personajeAtacante.jugador) {
 
-      atacanteCoordenadaY =  Math.round((personajeAtacante.coordenadaY / 528) * dimensiones.alto);
-
-      if (personajeAtacante.jugador) {
-
-        coordenadaX = Math.round(((personajeDefensor.coordenadaX - 64) / 528) * dimensiones.ancho);
-        coordenadaY = Math.round(((personajeDefensor.coordenadaY - 32) / 528) * dimensiones.alto);
-
-      } else {
-
-        coordenadaX = Math.round(((personajeDefensor.coordenadaX + 64) / 528) * dimensiones.ancho);
-        coordenadaY = Math.round(((personajeDefensor.coordenadaY + 32) / 528) * dimensiones.alto);
-      }
+      coordenadaX = Math.round(((personajeDefensor.coordenadaX - 64) / 528) * dimensiones.ancho);
+      coordenadaY = Math.round(((personajeDefensor.coordenadaY - 32) / 528) * dimensiones.alto);
 
     } else {
 
-      atacanteCoordenadaY =  Math.round(((personajeAtacante.coordenadaY - 74) / 528) * dimensiones.alto);
-
-      if (personajeAtacante.jugador) {
-
-        coordenadaX = Math.round(((personajeDefensor.coordenadaX - 64) / 528) * dimensiones.ancho);
-        coordenadaY = Math.round((((personajeDefensor.coordenadaY - 74) - 32) / 528) * dimensiones.alto);
-
-      } else {
-        
-        coordenadaX = Math.round(((personajeDefensor.coordenadaX + 64) / 528) * dimensiones.ancho);
-        coordenadaY = Math.round((((personajeDefensor.coordenadaY - 74) + 32) / 528) * dimensiones.alto);
-      }
-    }  
+      coordenadaX = Math.round(((personajeDefensor.coordenadaX + 64) / 528) * dimensiones.ancho);
+      coordenadaY = Math.round(((personajeDefensor.coordenadaY + 32) / 528) * dimensiones.alto);
+    }
 
     const imagenPersonajeAtacante: HTMLImageElement = document.getElementById(`personaje${ataque.personajeAtacante.identificador}`) as HTMLImageElement;
     const imagenPersonajeDefensor: HTMLImageElement = document.getElementById(`personaje${ataque.personajeDefensor.identificador}`) as HTMLImageElement;
@@ -193,10 +164,10 @@ export class AnimacionesService {
     return;
   }
 
-  async animarSaludDefensa(personajes: Personaje[], ataque: Ataque) {
+  async animarDanio(personajes: Personaje[], ataque: Ataque) {
 
     const personaje = personajes.find(personaje => personaje.identificador === ataque.personajeDefensor.identificador)!;
-    const contenedorAnimacion: HTMLDivElement = document.getElementById(`animacion${personaje.identificador}`) as HTMLDivElement;
+    const contenedor: HTMLDivElement = document.getElementById(`danio${personaje.identificador}`) as HTMLDivElement;
 
     let texto: string;
     let color: string;
@@ -229,10 +200,10 @@ export class AnimacionesService {
       }
     }
 
-    contenedorAnimacion.style.backgroundColor = 'transparent';
-    contenedorAnimacion.style.borderColor = 'transparent';
-    contenedorAnimacion.style.color = color;
-    contenedorAnimacion.textContent = texto;
+    contenedor.style.backgroundColor = 'transparent';
+    contenedor.style.borderColor = 'transparent';
+    contenedor.style.color = color;
+    contenedor.textContent = texto;
 
     const imagen: HTMLImageElement = document.createElement('img');
     const rutaIcono: string = `assets/images/icons/${icono}.ico`; 
@@ -242,13 +213,13 @@ export class AnimacionesService {
     imagen.style.filter = filtro;
     imagen.src = rutaIcono;
 
-    contenedorAnimacion.appendChild(imagen);
-    contenedorAnimacion.style.opacity = '1';
+    contenedor.appendChild(imagen);
+    contenedor.style.opacity = '1';
 
     await tiempoEspera(500);
     
-    contenedorAnimacion.style.opacity = '0';  
-    contenedorAnimacion.innerHTML = '';  
+    contenedor.style.opacity = '0';  
+    contenedor.innerHTML = '';  
   }
 
   async animarInconcienciaPersonaje(personaje: Personaje): Promise<void> {
@@ -263,7 +234,7 @@ export class AnimacionesService {
 
     const imagenPersonaje: HTMLImageElement = document.getElementById(`personaje${identificadorPersonaje}`) as HTMLImageElement;
     const imagenAura: HTMLImageElement = document.getElementById(`aura${identificadorPersonaje}`) as HTMLImageElement;
-    const contenedorAnimacion: HTMLDivElement = document.getElementById(`animacion${identificadorPersonaje}`) as HTMLDivElement;
+    const contenedorAnimacion: HTMLDivElement = document.getElementById(`danio${identificadorPersonaje}`) as HTMLDivElement;
 
     await tiempoEspera(1000);
 
@@ -303,61 +274,26 @@ export class AnimacionesService {
     });
   }
 
-  borrarBotones(personajes: Personaje[]): void {
-
-    this.borrarAuras(personajes);
-
-    const botonAtaque: HTMLButtonElement = document.getElementById('botonAtaque') as HTMLButtonElement;
-    const botonHabilidadEspecial: HTMLButtonElement = document.getElementById('botonHabilidadEspecial') as HTMLButtonElement;
-    const botonTerminarTurno: HTMLButtonElement = document.getElementById('botonTerminarTurno') as HTMLButtonElement;
+  async animarObjetivoAtaque(personaje: Personaje): Promise<void> {
     
-    botonAtaque.remove();
-    botonHabilidadEspecial.remove();
-    botonTerminarTurno.remove();
-  }
+    const imagen: HTMLDivElement = document.getElementById(`personaje${personaje.identificador}`) as HTMLImageElement;
 
-  async animarObjetivoAtaque(patallaPC: boolean, personaje: Personaje): Promise<void> {
-    
-    const contenedorAnimacion: HTMLDivElement = document.getElementById(`animacion${personaje.identificador}`) as HTMLDivElement;
-    const animacion: HTMLDivElement = document.createElement('div');    
-    
-    contenedorAnimacion.style.backgroundColor = 'white';
-    contenedorAnimacion.style.border = '2px solid white';    
-    contenedorAnimacion.style.borderRadius = '4px';
-    contenedorAnimacion.style.opacity = '0.5';
-    
-    animacion.style.alignItems = 'center'; 
-    animacion.style.backgroundColor = 'blue';       
-    animacion.style.border = '1px solid gray';
-    animacion.style.color = 'white';
-    animacion.style.display = 'flex';
-    animacion.style.fontSize = '20px';
-    animacion.style.height = '100%';
-    animacion.style.justifyContent = 'center';
-    animacion.style.textAlign = 'center';
-    animacion.style.width = '100%';
+    let filtro: string = 'brightness(1.5)'
 
-    if (patallaPC) {
+    while (this.animarPersonajePosturaObjetivo) {
 
-      animacion.textContent = 'Seleccionar';
+      imagen.style.filter = filtro;
 
-    } else {
+      if (filtro === 'brightness(1.5)') { 
 
-      animacion.textContent = String.fromCodePoint(0x1F847);
+        filtro = 'brightness(0.5)';
+
+      } else {
+
+        filtro = 'brightness(1.5)';
+      }
+
+      await tiempoEspera(250);
     }
-    
-    contenedorAnimacion.appendChild(animacion);    
-  }
-
-  borrarContenedorAnimacion(personajes: Personaje[]) {
-
-    personajes.forEach(personaje => {
-
-      const contenedorAnimacion: HTMLDivElement = document.getElementById(`animacion${personaje.identificador}`) as HTMLDivElement;
-
-      contenedorAnimacion.style.opacity = '0';
-      contenedorAnimacion.innerHTML = '';
-
-    });
   }
 }

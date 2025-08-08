@@ -23,7 +23,7 @@ export function obtenerPersonajesPrimeraEtapa(): Personaje[] {
     alto: 72,
     ancho: 72,
     coordenadaX: 232,
-    coordenadaY: 178
+    coordenadaY: 104
   };
 
   const personaje2: Personaje = {
@@ -45,7 +45,7 @@ export function obtenerPersonajesPrimeraEtapa(): Personaje[] {
     alto: 72,
     ancho: 72,
     coordenadaX: 168,
-    coordenadaY: 210
+    coordenadaY: 136
   };
 
   const personaje3: Personaje = {
@@ -67,7 +67,7 @@ export function obtenerPersonajesPrimeraEtapa(): Personaje[] {
     alto: 72,
     ancho: 72,
     coordenadaX: 104,
-    coordenadaY: 242
+    coordenadaY: 168
   };
 
   const personaje4: Personaje = {
@@ -89,7 +89,7 @@ export function obtenerPersonajesPrimeraEtapa(): Personaje[] {
     alto: 72,
     ancho: 72,
     coordenadaX: 40,
-    coordenadaY: 274
+    coordenadaY: 200
   };
 
   const personaje5: Personaje = {
@@ -111,7 +111,7 @@ export function obtenerPersonajesPrimeraEtapa(): Personaje[] {
     alto: 72,
     ancho: 72,
     coordenadaX: 420,
-    coordenadaY: 274
+    coordenadaY: 200
   };
 
   const personaje6: Personaje = {
@@ -133,7 +133,7 @@ export function obtenerPersonajesPrimeraEtapa(): Personaje[] {
     alto: 72,
     ancho: 64,
     coordenadaX: 356,
-    coordenadaY: 306
+    coordenadaY: 232
   };
 
   const personaje7: Personaje = {
@@ -155,7 +155,7 @@ export function obtenerPersonajesPrimeraEtapa(): Personaje[] {
     alto: 72,
     ancho: 72,
     coordenadaX: 292,
-    coordenadaY: 338
+    coordenadaY: 264
   };
 
   const personaje8: Personaje = {
@@ -177,7 +177,7 @@ export function obtenerPersonajesPrimeraEtapa(): Personaje[] {
     alto: 72,
     ancho: 72,
     coordenadaX: 228,
-    coordenadaY: 370
+    coordenadaY: 296
   };
 
   listaPersonajes.push(personaje1);
