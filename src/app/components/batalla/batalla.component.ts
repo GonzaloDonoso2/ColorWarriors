@@ -120,8 +120,8 @@ export class BatallaComponent implements AfterViewInit,  OnInit {
 
     obtenerDimensionesContenedorEscenario(): DimensionesEscenario {
 
-        const dimensionesEscenario: DimensionesEscenario = new DimensionesEscenario (this.contenedorEscenario.nativeElement.clientHeight, this.contenedorEscenario.nativeElement.clientWidth);
-        
+        const dimensionesEscenario: DimensionesEscenario = new DimensionesEscenario(this.contenedorEscenario.nativeElement.clientHeight, this.contenedorEscenario.nativeElement.clientWidth);
+
         return dimensionesEscenario;
     }
 
@@ -286,25 +286,61 @@ export class BatallaComponent implements AfterViewInit,  OnInit {
 
         await tiempoEspera(1000);
 
-        if (victoria.jugador) { 
+        if (victoria.jugador) {
 
             Swal.fire({
                 allowEscapeKey: false,
                 allowOutsideClick: false,
                 backdrop: true,
-                confirmButtonColor: 'green',
-                confirmButtonText: 'Volver a Jugar',
-                html: `<h1 style="font-family: 'FuenteTextos';">VICTORIA</h4><h1 style="font-family: 'FuenteTextos';">Felicidades ${nombreJugador}</h4>`,
-                showCancelButton: false,
-                showCloseButton: false,
-                showConfirmButton: true
-            }).then((result) => {
+                html: `<div style="font-family: 'VT323';">
+                  <h1>Felicidades ${nombreJugador}.</h1>
+                  <br><br>
+                  <button 
+                  id="botonVolverInicio"
+                  style="
+                    background-color: green;
+                    border-color: white;
+                    border-radius: 4px;          
+                    color: white;
+                    height: 40px;
+                    width: 50%;
+                    type="button">Volver a Jugar</button>
+                  </div>`,
+                showConfirmButton: false,
+                padding: 0,
+                width: 'min(90dvw, 750px)',
+                didOpen: () => {
+                    const popup = Swal.getPopup()!;
+                    Object.assign(popup.style, {
+                        backgroundColor: 'white',
+                        borderRadius: '4px',
+                        border: '2px solid white',
+                        height: 'min(90dvh, 200px)',
+                        opacity: '1',
+                        transition: 'opacity 0.5s ease',
+                        zIndex: '0'
+                    });
 
-                if (result.isConfirmed) { 
+                    const html = Swal.getHtmlContainer()!;
+                    Object.assign(html.style, {
+                        color: 'white',
+                        backgroundColor: 'blue',
+                        borderRadius: '4px',
+                        fontSize: '20px',
+                        height: '100%',
+                        lineHeight: '20px',
+                        transition: 'opacity 0.5s ease',
+                        width: '100%',
+                        border: '1px solid gray'
+                    });
 
-                    this.reproductorMusicaBatalla.nativeElement.pause();        
-                    this.reproductorMusicaBatalla.nativeElement.currentTime = 0;
-                    this.router.navigate(['']); 
+                    document.getElementById('botonVolverInicio')?.addEventListener('click', () => {
+                        
+                        this.reproductorMusicaBatalla.nativeElement.pause();
+                        this.reproductorMusicaBatalla.nativeElement.currentTime = 0;
+                        Swal.close();
+                        this.router.navigate(['']);
+                    });
                 }
             });
 
@@ -314,15 +350,55 @@ export class BatallaComponent implements AfterViewInit,  OnInit {
                 allowEscapeKey: false,
                 allowOutsideClick: false,
                 backdrop: true,
-                confirmButtonColor: 'red',
-                confirmButtonText: 'Volver a Jugar',
-                html: `<h1 style="font-family: 'FuenteTextos';">DERROTA</h1>`,
-                showCancelButton: false,
-                showCloseButton: false,
-                showConfirmButton: true
-            }).then((result) => {
+                html: `<div style="font-family: 'VT323';">
+                  <h1>Has sido derrotado ${nombreJugador}.</h1>
+                  <br><br>
+                  <button 
+                  id="botonVolverInicio"
+                  style="
+                    background-color: green;
+                    border-color: white;
+                    border-radius: 4px;          
+                    color: white;
+                    height: 40px;
+                    width: 50%;
+                    type="button">Volver al Inicio</button>
+                  </div>`,
+                showConfirmButton: false,
+                padding: 0,
+                width: 'min(90dvw, 750px)',
+                didOpen: () => {
+                    const popup = Swal.getPopup()!;
+                    Object.assign(popup.style, {
+                        backgroundColor: 'white',
+                        borderRadius: '4px',
+                        border: '2px solid white',
+                        height: 'min(90dvh, 200px)',
+                        opacity: '1',
+                        transition: 'opacity 0.5s ease',
+                        zIndex: '0'
+                    });
 
-                if (result.isConfirmed) { this.router.navigate(['']); }
+                    const html = Swal.getHtmlContainer()!;
+                    Object.assign(html.style, {
+                        color: 'white',
+                        backgroundColor: 'blue',
+                        borderRadius: '4px',
+                        fontSize: '20px',
+                        height: '100%',
+                        lineHeight: '20px',
+                        transition: 'opacity 0.5s ease',
+                        width: '100%',
+                        border: '1px solid gray'
+                    });
+
+                    document.getElementById('botonVolverInicio')?.addEventListener('click', () => {
+
+                        this.reproductorMusicaBatalla.nativeElement.pause();
+                        this.reproductorMusicaBatalla.nativeElement.currentTime = 0;
+                        this.router.navigate(['']);
+                    });
+                }
             });
         }
     }

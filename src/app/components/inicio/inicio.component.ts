@@ -1,4 +1,4 @@
-import { Component, ElementRef, OnInit, ViewChild } from '@angular/core';
+import { Component, ElementRef, HostListener, OnInit, ViewChild } from '@angular/core';
 import { Router } from '@angular/router';
 import Swal from 'sweetalert2';
 import { reproducirSonido } from '../../utils/utilidades';
@@ -17,18 +17,65 @@ export class InicioComponent implements OnInit{
 
   ngOnInit(): void {}
 
+  @HostListener('document:keydown.enter', ['$event'])
+  onEnterPress(event: KeyboardEvent) {
+
+    event.preventDefault();  
+          
+    this.iniciarJuego();           
+  }
+
   mostrarPanelError() {
-    
+
     Swal.fire({
-      allowEscapeKey: false,   
-      allowOutsideClick: false,    
-      backdrop: true, 
-      icon: 'error',
-      html: `<h1 style="font-family: 'FuenteTextos';">Error</h1><p style="font-family: 'FuenteTextos';, font-size: '2rem';">Falta el nombre del jugador.</p>`, 
-      showCancelButton: false,
-      showCloseButton: true,
-      showConfirmButton: false
-    })
+      allowEscapeKey: false,
+      allowOutsideClick: false,
+      backdrop: true,
+      html: `<div style="font-family: 'VT323';">
+      <h1>Falta el nombre del jugador.</h1>
+      <br><br>
+      <button 
+      id="botonVolverInicio"
+      style="
+        background-color: green;
+        border-color: white;
+        border-radius: 4px;          
+        color: white;
+        height: 40px;
+        width: 50%;
+        type="button">Volver</button>
+      </div>`,
+      showConfirmButton: false,
+      padding: 0,
+      width: 'min(90dvw, 750px)',
+      didOpen: () => {
+        const popup = Swal.getPopup()!;       
+        Object.assign(popup.style, {
+          backgroundColor: 'white',
+          borderRadius: '4px',
+          border: '2px solid white',
+          height: 'min(90dvh, 200px)',
+          opacity: '1',
+          transition: 'opacity 0.5s ease',
+          zIndex: '0'
+        });
+
+        const html = Swal.getHtmlContainer()!;  
+        Object.assign(html.style, {
+          color: 'white',
+          backgroundColor: 'blue',
+          borderRadius: '4px',
+          fontSize: '20px',
+          height: '100%',
+          lineHeight: '20px',
+          transition: 'opacity 0.5s ease',
+          width: '100%',
+          border: '1px solid gray'
+        });
+
+        document.getElementById('botonVolverInicio')?.addEventListener('click', () => { Swal.close(); });
+      }
+    });
   }
 
   iniciarJuego(): void {

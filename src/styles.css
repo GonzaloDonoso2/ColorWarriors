@@ -1,9 +1,9 @@
 body {
   background-color: black;
   color: white;
-  height: 100vh;
+  height: 100dvh;
   overflow: hidden;
-  width: 100vw;
+  width: 100dvw;
 }
 
 @font-face {
